@@ -2,7 +2,7 @@
 Change the values of the following variables in the file: mbed-os/connectivity/FEATUR_BLE/source/cordio/mbed_lib.json
 - "desired-att-mtu": 250
 - "rx-acl-buffer-size": 255
-- PB_6 and PB_7 are reserevd for CONSOLE_TX and CNSOLE_RX
+- PB_6 and PB_7 are reserevd for CONSOLE_TX and CNSOLE_RX. Therefore do not use PB_6 and PB_7.
 */
 
 // Standard Library Headers

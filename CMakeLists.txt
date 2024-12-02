@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.19)
 cmake_policy(VERSION 3.19)
 
 # Enable OPENOCD upload method for NUCLEO_WB55RG
-file(COPY ${CMAKE_SOURCE_DIR}/libs/config/mbed-os/NUCLEO_WB55RG.cmake
+file(COPY ${CMAKE_SOURCE_DIR}/scripts/config/NUCLEO_WB55RG.cmake
      DESTINATION ${CMAKE_SOURCE_DIR}/mbed-os/targets/upload_method_cfg)
 
 
