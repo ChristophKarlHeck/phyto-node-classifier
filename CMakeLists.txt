@@ -24,7 +24,7 @@ add_subdirectory(libs/flatbuffers
 ${CMAKE_CURRENT_BINARY_DIR}/flatbuffers-build
 EXCLUDE_FROM_ALL)
 
-project(MbedTorchFusionOS CXX) # TODO: change this to your project name
+project(PhytoClassifier CXX) # TODO: change this to your project name
 
 set(SOURCES 
      ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
