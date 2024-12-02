@@ -36,9 +36,9 @@ set(SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/src/serial_mail_sender/SerialMailSender.cpp
 )
 
-add_executable(SoftMaxTorchRunner ${SOURCES})
+add_executable(PhytoClassifier ${SOURCES})
 
-target_link_libraries(SoftMaxTorchRunner PUBLIC
+target_link_libraries(PhytoClassifier PUBLIC
      mbed-os # Can also link to mbed-baremetal here
      #mbed-ble
      flatbuffers
@@ -52,7 +52,7 @@ target_link_libraries(SoftMaxTorchRunner PUBLIC
      ) 
 
 ###GENRAL###
-target_include_directories(SoftMaxTorchRunner
+target_include_directories(PhytoClassifier
      PUBLIC 
           ${CMAKE_CURRENT_SOURCE_DIR}/include #need it for executorch includes and logger.h
           ${CMAKE_CURRENT_SOURCE_DIR}/libs #for executorch headers
@@ -60,10 +60,8 @@ target_include_directories(SoftMaxTorchRunner
           ${CMAKE_CURRENT_SOURCE_DIR}/models     
 )
 
-#add_dependencies(SoftMaxTorchRunner gen_model_header)
-
 ###GENRAL####
-mbed_set_post_build(SoftMaxTorchRunner) # Must call this for each target to set up bin file creation, code upload, etc
+mbed_set_post_build(PhytoClassifier) # Must call this for each target to set up bin file creation, code upload, etc
 
 
 ###GENRAL###

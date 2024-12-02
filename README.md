@@ -4,9 +4,9 @@ MbedTorch Fusion OS: Seamlessly merges Mbed OS with Torch ML models for the P-Nu
 Tutorial: https://youtu.be/jc_GCxAAO20
 
 ## 1. Build ExecuTorch libraries
-> git clone https://github.com/ChristophKarlHeck/mbed-torch-fusion-os.git
+> git clone https://github.com/ChristophKarlHeck/phyto-classifier.git
 
-> cd mbed-torch-fusion-os/utils/scripts
+> cd phyto-classifier/utils/scripts
 
 > ./build_et_libs.sh
 
