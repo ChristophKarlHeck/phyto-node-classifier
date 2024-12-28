@@ -4,23 +4,18 @@
 cmake_minimum_required(VERSION 3.19)
 cmake_policy(VERSION 3.19)
 
-# Enable OPENOCD upload method for NUCLEO_WB55RG
-file(COPY ${CMAKE_SOURCE_DIR}/scripts/config/NUCLEO_WB55RG.cmake
-     DESTINATION ${CMAKE_SOURCE_DIR}/mbed-os/targets/upload_method_cfg)
-
-
 # Initialize Mbed OS build system. 
 # Note: This block must be before the project() call.
 set(MBED_APP_JSON_PATH ${CMAKE_SOURCE_DIR}/mbed_app.json5)
 # set(CUSTOM_TARGETS_JSON_PATH custom_targets.json) # If you need a custom target, use this line to specify the custom_targets.json
 
-include(mbed-os/tools/cmake/app.cmake) # Load Mbed CE toolchain file and basic build system
+include(third-party/mbed-os/tools/cmake/app.cmake) # Load Mbed CE toolchain file and basic build system
 
 # If you need any custom upload method configuration for your target, do that here
 
-add_subdirectory(mbed-os) # Load Mbed OS build targets.  Must be added before any other subdirectories
+add_subdirectory(third-party/mbed-os) # Load Mbed OS build targets.  Must be added before any other subdirectories
 
-add_subdirectory(libs/flatbuffers
+add_subdirectory(third-party/flatbuffers
 ${CMAKE_CURRENT_BINARY_DIR}/flatbuffers-build
 EXCLUDE_FROM_ALL)
 
@@ -42,12 +37,14 @@ target_link_libraries(PhytoClassifier PUBLIC
      mbed-os # Can also link to mbed-baremetal here
      #mbed-ble
      flatbuffers
+     /home/chris/executorch_v030/executorch/cmake-out/lib/libextension_runner_util.a
+     /home/chris/executorch_v030/executorch/cmake-out/lib/libexecutorch.a
      "-Wl,--whole-archive"
-     ${CMAKE_CURRENT_SOURCE_DIR}/libs/executorch/cmake-out/extension/runner_util/libextension_runner_util.a
-     ${CMAKE_CURRENT_SOURCE_DIR}/libs/executorch/cmake-out/libexecutorch.a
-     ${CMAKE_CURRENT_SOURCE_DIR}/libs/executorch/cmake-out/libexecutorch_no_prim_ops.a
-     ${CMAKE_CURRENT_SOURCE_DIR}/libs/executorch/cmake-out/kernels/portable/libportable_kernels.a
-     ${CMAKE_CURRENT_SOURCE_DIR}/libs/executorch/cmake-out/examples/arm/libarm_portable_ops_lib.a
+     /home/chris/executorch_v030/executorch/cmake-out/lib/libexecutorch_no_prim_ops.a
+     /home/chris/executorch_v030/executorch/cmake-out/kernels/quantized/libquantized_ops_lib.a
+     /home/chris/executorch_v030/executorch/cmake-out/examples/arm/libarm_portable_ops_lib.a
+     /home/chris/executorch_v030/executorch/cmake-out/kernels/quantized/libquantized_kernels.a
+     /home/chris/executorch_v030/executorch/cmake-out/lib/libportable_kernels.a
      "-Wl,--no-whole-archive"
      ) 
 
@@ -55,7 +52,7 @@ target_link_libraries(PhytoClassifier PUBLIC
 target_include_directories(PhytoClassifier
      PUBLIC 
           ${CMAKE_CURRENT_SOURCE_DIR}/include #need it for executorch includes and logger.h
-          ${CMAKE_CURRENT_SOURCE_DIR}/libs #for executorch headers
+          /home/chris/executorch_v030/ #for executorch headers
           ${CMAKE_CURRENT_SOURCE_DIR}/libs/flatbuffers/include
           ${CMAKE_CURRENT_SOURCE_DIR}/models     
 )

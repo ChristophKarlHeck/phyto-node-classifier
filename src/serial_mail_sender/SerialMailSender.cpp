@@ -35,12 +35,13 @@ std::vector<SerialMail::Value> SerialMailSender::convertToSerialMailValues(const
 // Serialize and send the SerialMail data
 void SerialMailSender::sendMail(void) {
 
-    // Access the shared queue
-    SendingQueue& sending_queue = SendingQueue::getInstance();
-
     while(true){
-        osEvent evt = sending_queue.mail_box.get();
-		if (evt.status == osEventMail) {
+        // Access the shared queue
+        SendingQueue& sending_queue = SendingQueue::getInstance();
+
+        auto mail = sending_queue.mail_box.try_get_for(rtos::Kernel::Clock::duration_u32::max());
+
+		if (mail) {
 
             // Prepare the FlatBufferBuilder
             // FlatBufferBuilder should ideally be re-initialized inside the while loop 
@@ -50,7 +51,7 @@ void SerialMailSender::sendMail(void) {
             flatbuffers::FlatBufferBuilder builder(1024);
 
             // Retrieve the message from the mail box
-            SendingQueue::mail_t *sending_mail = (SendingQueue::mail_t *)evt.value.p;
+            SendingQueue::mail_t *sending_mail = mail;
 
             // Create Flatbuffers vector of bytes
             std::vector<SerialMail::Value> raw_input_bytes = convertToSerialMailValues(sending_mail->inputs);
@@ -78,7 +79,7 @@ void SerialMailSender::sendMail(void) {
             // Send the FlatBuffers buffer
             m_serial_port.write(reinterpret_cast<const char*>(buf), size);
             
-            printf("sent\n");
+            //printf("sent\n");
             // Free the allocated mail to avoid memory leaks
 			// make mail box empty
 			sending_queue.mail_box.free(sending_mail); 

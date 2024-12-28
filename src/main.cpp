@@ -26,7 +26,8 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "utils/logger.h"
 
 // *** DEFINE GLOBAL CONSTANTS ***
-#define DOWNSAMPLING_RATE 10 // ms
+#define DOWNSAMPLING_RATE 1 // ms
+#define VECTOR_SIZE 5
 
 // CONVERSION
 #define DATABITS 8388608
@@ -43,11 +44,9 @@ Thread reading_data_thread;
 Thread sending_data_thread;
 
 // Function called in thread "reading_data_thread"
-void get_input_model_values_from_adc(unsigned int* model_input_size){
-
+void get_input_model_values_from_adc(void){
 	AD7124& adc = AD7124::getInstance(SPI_FREQUENCY);
-	adc.init(true, true); // activate both channels
-	adc.read_voltage_from_both_channels(DOWNSAMPLING_RATE,*model_input_size);
+    adc.read_voltage_from_both_channels(DOWNSAMPLING_RATE, VECTOR_SIZE);
 }
 
 void send_output_to_data_sink(void){
@@ -69,41 +68,32 @@ void print_heap_stats() {
 
 int main()
 {	
-	printf("start\n");
 
-	// Instantiate and initialize the model executor
-    ModelExecutor& model_executor = ModelExecutor::getInstance();
-	model_executor.initRuntime();
-    Result<torch::executor::Program> program = model_executor.loadModelBuffer();
-    const char* method_name = model_executor.getMethodName(program);
-    Result<torch::executor::MethodMeta> method_meta = model_executor.getMethodMeta(program, method_name);
-    torch::executor::MemoryAllocator method_allocator = model_executor.getMemoryAllocator();
-    std::vector<torch::executor::Span<uint8_t>> planned_spans = model_executor.setUpPlannedBuffer(program, method_meta);
-    Result<torch::executor::Method> method = model_executor.loadMethod(program, method_allocator, planned_spans, method_name);
-	unsigned int model_input_size = model_executor.getNumberOfInputValues(method);
-    model_executor.prepareInputs(method, method_name);
-	
-    // Access the shared ReadingQueue instance
-    ReadingQueue& reading_queue = ReadingQueue::getInstance();
+	// Start reading data from ADC Thread
+	reading_data_thread.start(callback(get_input_model_values_from_adc));
 
-	// Access the shared queue
-    SendingQueue& sending_queue = SendingQueue::getInstance();
-    
-	//Start reading data from ADC Thread
-	//unsigned int n = 4;
-	reading_data_thread.start(callback(get_input_model_values_from_adc, &model_input_size));
-
-	//Start sending Thread
+	// Start sending Thread
 	sending_data_thread.start(callback(send_output_to_data_sink));
 
 	int counter = 0;
 
     while (true) {
-		osEvent evt = reading_queue.mail_box.get();
-		if (evt.status == osEventMail) {
+
+		// Instantiate and initialize the model executor
+		ModelExecutor& executor = ModelExecutor::getInstance(1024); // Pass the desired pool size
+		
+		// Access the shared ReadingQueue instance
+		ReadingQueue& reading_queue = ReadingQueue::getInstance();
+
+		// Access the shared queue
+		SendingQueue& sending_queue = SendingQueue::getInstance();
+
+		auto mail = reading_queue.mail_box.try_get_for(rtos::Kernel::Clock::duration_u32::max());
+
+		if (mail) {
 
 		    // Retrieve the message from the mail box
-		    ReadingQueue::mail_t *reading_mail = (ReadingQueue::mail_t *)evt.value.p;
+		    ReadingQueue::mail_t* reading_mail = mail;
 
 			// Store reading data temporary
 			std::vector<std::array<uint8_t, 3>> inputs_as_bytes = reading_mail->inputs;
@@ -112,34 +102,30 @@ int main()
 			// Free the allocated mail to avoid memory leaks
 			// make mail box empty
 			reading_queue.mail_box.free(reading_mail); 
-
-			// Prepare result vector
-			std::vector<float> classification_result;
 				
 			// Convert received bytes to floats
 			std::vector<float> inputs = get_analog_inputs(inputs_as_bytes, DATABITS, VREF, GAIN);
+
 			// Execute Model with received inputs
-			model_executor.setModelInput(method, inputs);
-			model_executor.executeModel(method, method_name, DOWNSAMPLING_RATE);
-			classification_result = model_executor.getModelOutput(method);
+			std::vector<float> results = executor.run_model(inputs);
 
 			while (!sending_queue.mail_box.empty()) {
                 // Wait until sending queue is empty
-                thread_sleep_for(1000);
+                thread_sleep_for(1);
 				printf("Wait for the sending queue to become empty.\n");
             }
 		    
 			if (sending_queue.mail_box.empty()) {
 				SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
 				sending_mail->inputs = inputs_as_bytes;
-				sending_mail->classification = classification_result;
+				sending_mail->classification = results;
 				sending_mail->classification_active = true;
 				sending_mail->channel = channel;
 				sending_queue.mail_box.put(sending_mail); 
 			}
 			counter = counter + 1;
-			printf("Counter: %d\n", counter);
-			print_heap_stats();
+			//printf("Counter: %d\n", counter);
+			//print_heap_stats();
 		}
 	}
 
