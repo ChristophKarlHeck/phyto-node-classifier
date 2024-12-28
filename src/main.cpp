@@ -127,6 +127,7 @@ int main()
 			//printf("Counter: %d\n", counter);
 			//print_heap_stats();
 		}
+		thread_sleep_for(10);
 	}
 
 	// main() is expected to loop forever.
