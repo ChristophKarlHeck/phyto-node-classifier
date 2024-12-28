@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bleprocess_1',['BLEProcess',['../classBLEProcess.html',1,'BLEProcess'],['../classBLEProcess.html#af340b0958c6696584d2f3288d6d7e31a',1,'BLEProcess::BLEProcess()']]]
+  ['flatbuffers_5ffinal_5fclass_2',['FLATBUFFERS_FINAL_CLASS',['../structSerialMail_1_1FLATBUFFERS__FINAL__CLASS.html',1,'SerialMail']]]
 ];

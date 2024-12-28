@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['flatbuffers_5ffinal_5fclass_3',['FLATBUFFERS_FINAL_CLASS',['../structSerialMail_1_1FLATBUFFERS__FINAL__CLASS.html',1,'SerialMail']]]
+  ['mail_5ft_4',['mail_t',['../structReadingQueue_1_1mail__t.html',1,'ReadingQueue::mail_t'],['../structSendingQueue_1_1mail__t.html',1,'SendingQueue::mail_t']]],
+  ['modelexecutor_5',['ModelExecutor',['../classModelExecutor.html',1,'']]]
 ];

@@ -69,61 +69,65 @@ $(function() {
 <div class="title">AD7124.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef AD7124_H_</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define AD7124_H_</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;PinNames.h&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;adc/ad7124-defs.h&quot;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &quot;mbed.h&quot;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &quot;utils/logger.h&quot;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;cstdint&gt;</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;cstdio&gt;</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;mutex&gt;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="classAD7124.html">   12</a></span>&#160;<span class="keyword">class </span><a class="code" href="classAD7124.html">AD7124</a> : <span class="keyword">private</span> mbed::NonCopyable&lt;AD7124&gt; {</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    <span class="comment">// Static method to get the singleton instance</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keyword">static</span> <a class="code" href="classAD7124.html">AD7124</a>&amp; getInstance(<span class="keywordtype">int</span> spi_frequency) {</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        <span class="keyword">static</span> <a class="code" href="classAD7124.html">AD7124</a> instance(spi_frequency); <span class="comment">// Thread-safe in C++11 and later</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        <span class="keywordflow">return</span> instance;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    }</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="comment">// Delete copy constructor and assignment operator to ensure singleton</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <a class="code" href="classAD7124.html">AD7124</a>(<span class="keyword">const</span> <a class="code" href="classAD7124.html">AD7124</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <a class="code" href="classAD7124.html">AD7124</a>&amp; operator=(<span class="keyword">const</span> <a class="code" href="classAD7124.html">AD7124</a>&amp;) = <span class="keyword">delete</span>;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="comment">// Public methods</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordtype">void</span> init(<span class="keywordtype">bool</span> f0, <span class="keywordtype">bool</span> f1);</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordtype">void</span> read_voltage_from_both_channels(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> downsampling_rate, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> model_input_size);</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="comment">// Private constructor</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <a class="code" href="classAD7124.html">AD7124</a>(<span class="keywordtype">int</span> spi_frequency);</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="comment">// Member variables</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    SPI m_spi;                      <span class="comment">// SPI object for communication with the AD7124</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">int</span> m_spi_frequency;            <span class="comment">// SPI Frequency</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keywordtype">bool</span> m_flag_0;                  <span class="comment">// Flags for channel configuration</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">bool</span> m_flag_1;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">char</span> m_read;                    <span class="comment">// Read operation indicator</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordtype">char</span> m_write;                   <span class="comment">// Write operation indicator</span></div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160; </div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#ifndef ADC_PROCESS_H_</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#define ADC_PROCESS_H_</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160; </div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment">// Required for SPI, DigitalIn, DigitalOut, NonCopyable</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">// Handle Body idiom could be applied to remove mbed.h</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment">// from header entirely</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &quot;mbed.h&quot;</span>   </div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="classAD7124.html">   18</a></span>&#160;<span class="keyword">class </span><a class="code" href="classAD7124.html">AD7124</a>: <span class="keyword">private</span> mbed::NonCopyable&lt;AD7124&gt;{</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;        <span class="keyword">static</span> <a class="code" href="classAD7124.html">AD7124</a>&amp; <a class="code" href="classAD7124.html#a02acf146ca56efdee458971bf56c9ff3">getInstance</a>(<span class="keywordtype">int</span> spi_frequency);</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        <span class="comment">// Deleted copy constructor to prevent copying of the singleton instance.</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        <a class="code" href="classAD7124.html">AD7124</a>(<span class="keyword">const</span> <a class="code" href="classAD7124.html">AD7124</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classAD7124.html#ac94edbc384ec1e235362da7587e67693">   31</a></span>&#160;        <a class="code" href="classAD7124.html">AD7124</a>&amp; <a class="code" href="classAD7124.html#ac94edbc384ec1e235362da7587e67693">operator=</a>(<span class="keyword">const</span> <a class="code" href="classAD7124.html">AD7124</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classAD7124.html#aba9604141394112cd788eaca70787026">read_voltage_from_both_channels</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> downsampling_rate, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> vector_size);</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keyword">private</span>:</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="comment">// Private helper methods</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordtype">void</span> reset(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordtype">char</span> status(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordtype">void</span> channel_reg(<span class="keywordtype">char</span> RW);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordtype">void</span> config_reg(uint8_t address, <span class="keywordtype">char</span> RW);</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keywordtype">void</span> filter_reg(uint8_t filt, <span class="keywordtype">char</span> RW);</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordtype">void</span> ctrl_reg(<span class="keywordtype">char</span> RW);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordtype">void</span> send_data_to_main_thread(</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        std::vector&lt;std::array&lt;uint8_t,3&gt;&gt; byte_inputs_channel_0,</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        std::vector&lt;std::array&lt;uint8_t,3&gt;&gt; byte_inputs_channel_1,</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> model_input_size);</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;};</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* AD7124_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclassAD7124_html"><div class="ttname"><a href="classAD7124.html">AD7124</a></div><div class="ttdef"><b>Definition:</b> AD7124.h:12</div></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        SPI         m_spi;              </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        DigitalIn   m_drdy;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        DigitalOut  m_cs;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        DigitalOut  m_sync;             </div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordtype">int</span>         m_spi_frequency;   </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keywordtype">int</span>         m_flag_0;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordtype">int</span>         m_flag_1;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keywordtype">char</span>        m_read;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keywordtype">char</span>        m_write;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <a class="code" href="classAD7124.html">AD7124</a>(<span class="keywordtype">int</span> spi_frequency);</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordtype">void</span> init(<span class="keywordtype">bool</span> f0, <span class="keywordtype">bool</span> f1);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keywordtype">void</span> reset(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keywordtype">char</span> status(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <span class="keywordtype">void</span> channel_reg(<span class="keywordtype">char</span> RW);</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="keywordtype">void</span> config_reg(uint8_t address, <span class="keywordtype">char</span> RW);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        <span class="keywordtype">void</span> filter_reg(uint8_t filt, <span class="keywordtype">char</span> RW);</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="keywordtype">void</span> ctrl_reg(<span class="keywordtype">char</span> RW);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="keywordtype">void</span> send_data_to_main_thread(</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;            std::vector&lt;std::array&lt;uint8_t, 3&gt;&gt; byte_inputs_channel_0,</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;            std::vector&lt;std::array&lt;uint8_t, 3&gt;&gt; byte_inputs_channel_1,</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;            <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> model_input_size</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        );</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;};</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassAD7124_html"><div class="ttname"><a href="classAD7124.html">AD7124</a></div><div class="ttdoc">Singleton class for interfacing with the AD7124 using SPI.</div><div class="ttdef"><b>Definition:</b> AD7124.h:18</div></div>
+<div class="ttc" id="aclassAD7124_html_a02acf146ca56efdee458971bf56c9ff3"><div class="ttname"><a href="classAD7124.html#a02acf146ca56efdee458971bf56c9ff3">AD7124::getInstance</a></div><div class="ttdeci">static AD7124 &amp; getInstance(int spi_frequency)</div><div class="ttdoc">Gets the singleton instance of the AD7124 class.</div><div class="ttdef"><b>Definition:</b> AD7124.cpp:200</div></div>
+<div class="ttc" id="aclassAD7124_html_aba9604141394112cd788eaca70787026"><div class="ttname"><a href="classAD7124.html#aba9604141394112cd788eaca70787026">AD7124::read_voltage_from_both_channels</a></div><div class="ttdeci">void read_voltage_from_both_channels(unsigned int downsampling_rate, unsigned int vector_size)</div><div class="ttdoc">Reads voltage data from both ADC channels.</div><div class="ttdef"><b>Definition:</b> AD7124.cpp:273</div></div>
+<div class="ttc" id="aclassAD7124_html_ac94edbc384ec1e235362da7587e67693"><div class="ttname"><a href="classAD7124.html#ac94edbc384ec1e235362da7587e67693">AD7124::operator=</a></div><div class="ttdeci">AD7124 &amp; operator=(const AD7124 &amp;)=delete</div><div class="ttdoc">Deleted copy assignment operator to prevent copying of the singleton instance.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

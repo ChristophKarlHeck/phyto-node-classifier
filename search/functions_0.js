@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bleprocess_47',['BLEProcess',['../classBLEProcess.html#af340b0958c6696584d2f3288d6d7e31a',1,'BLEProcess']]]
+  ['getinstance_22',['getInstance',['../classAD7124.html#a02acf146ca56efdee458971bf56c9ff3',1,'AD7124']]]
 ];
