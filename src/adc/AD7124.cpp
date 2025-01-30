@@ -1,6 +1,7 @@
 
 #include "adc/AD7124.h"
 #include "adc/AD7124-defs.h"
+#include "preprocessing/Preprocessing.h"
 #include "utils/utils.h"
 #include "utils/logger.h"
 #include "interfaces/ReadingQueue.h"
@@ -267,61 +268,56 @@ void AD7124::send_data_to_main_thread(
 
 /**
  * @brief Reads voltage data from both ADC channels with downsampling.
- * @param downsampling_rate The rate to downsample ADC readings (in ms).
+ * @param downsampling_rate The rate to downsample ADC readings (in ms). E.g.
  * @param vector_size The size of the resulting data vectors.
  */
 void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, unsigned int vector_size){
 
-    while (true){
-        std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
-        std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
-        
-        // While the vector's size is less than 4, append 3-byte arrays
-        while ((byte_inputs_channel_0.size() < vector_size) && (byte_inputs_channel_1.size() < vector_size)){
+    Timer timer;
+    unsigned int collection_interval = downsampling_rate / vector_size;
+    std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
+    std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
+
+    while (true){ // Collect values forever
+
+        for (unsigned int i = 0; i < vector_size; ++i) {
+            std::vector<std::array<uint8_t,3>> temp_values_channel_0;
+            std::vector<std::array<uint8_t,3>> temp_values_channel_1;
+            timer.reset();
+            timer.start();
             
-            while(m_drdy == 0){
-                wait_us(1);
-            }
-            while(m_drdy == 1){
-                wait_us(1);
+            while (timer.elapsed_time().count() < (collection_interval * 1000)){ // Convert seconds to milliseconds
+                
+                while(m_drdy == 0){
+                    wait_us(1);
+                }
+                while(m_drdy == 1){
+                    wait_us(1);
+                }
+
+                uint8_t data[4] = {0, 0, 0, 255};
+                for(int j = 0; j < 4; j++){
+                    // Sends 0x00 and simultaneously receives a byte from the SPI slave device.
+                    data[j] = m_spi.write(0x00);
+                }
+
+                std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
+                            
+                if(data[3] == 0){
+                    temp_values_channel_0.push_back(new_bytes);
+                }
+
+                if(data[3] == 1){
+                    temp_values_channel_1.push_back(new_bytes);
+                }
+
+                thread_sleep_for(1); // to avoid CPU exhaustion
             }
 
-            uint8_t data[4] = {0, 0, 0, 255};
-            for(int j = 0; j < 4; j++){
-                // Sends 0x00 and simultaneously receives a byte from the SPI slave device.
-                data[j] = m_spi.write(0x00);
-            }
-                        
-            if(data[3] == 0){
-                // data from channel 0
-                if (byte_inputs_channel_0.size() < vector_size) {
-                    // Add new value
-                    std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
-                    byte_inputs_channel_0.push_back(new_bytes);
-                } else {
-                    // Replace the oldest value with the new value (circular buffer approach)
-                    std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
-                    byte_inputs_channel_0.erase(byte_inputs_channel_0.begin()); // Remove the oldest element
-                    byte_inputs_channel_0.push_back(new_bytes); // Add the new value
-                }
-            }
-
-            if(data[3] == 1){
-                // data from channel 1
-                if(byte_inputs_channel_1.size() < vector_size){
-                    // Add new value
-                    std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
-                    byte_inputs_channel_1.push_back(new_bytes);
-                } else{
-                    // Replace the oldest value with the new value (circular buffer approach)
-                    std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
-                    byte_inputs_channel_1.erase(byte_inputs_channel_1.begin()); // Remove the oldest element
-                    byte_inputs_channel_1.push_back(new_bytes);
-                }
-            }
-            
+            byte_inputs_channel_0.push_back(Preprocessing::computeMean(temp_values_channel_0));
+            byte_inputs_channel_1.push_back(Preprocessing::computeMean(temp_values_channel_1));
         }
-        thread_sleep_for(1); // ms
+        
         send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1, vector_size);
     }
 }
