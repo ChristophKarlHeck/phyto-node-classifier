@@ -277,6 +277,7 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
     unsigned int collection_interval = downsampling_rate / vector_size;
     std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
     std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
+    unsigned int circular_buffer_size = 100;
 
     while (true){ // Collect values forever
 
@@ -304,11 +305,29 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
                 std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
                             
                 if(data[3] == 0){
-                    temp_values_channel_0.push_back(new_bytes);
+                    if(temp_values_channel_0.size() < circular_buffer_size){
+                        // Add new value
+                        temp_values_channel_0.push_back(new_bytes);
+                    }
+                    else{
+                        // Replace the oldest value with the new value (circular buffer approach)
+                        temp_values_channel_0.erase(temp_values_channel_0.begin());
+                        temp_values_channel_0.push_back(new_bytes);
+                    }
+                    
                 }
 
                 if(data[3] == 1){
-                    temp_values_channel_1.push_back(new_bytes);
+                    if(temp_values_channel_1.size() < circular_buffer_size){
+                        // Add new value
+                        temp_values_channel_1.push_back(new_bytes);
+                    }
+                    else{
+                        // Replace the oldest value with the new value (circular buffer approach)
+                        temp_values_channel_1.erase(temp_values_channel_1.begin());
+                        temp_values_channel_1.push_back(new_bytes);
+                    }
+                    
                 }
 
                 thread_sleep_for(1); // to avoid CPU exhaustion
