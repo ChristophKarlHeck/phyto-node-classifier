@@ -211,8 +211,7 @@ AD7124& AD7124::getInstance(int spi_frequency) {
  */
 void AD7124::send_data_to_main_thread(
     std::vector<std::array<uint8_t,3>> byte_inputs_channel_0,
-    std::vector<std::array<uint8_t,3>> byte_inputs_channel_1,
-    unsigned int model_input_size)
+    std::vector<std::array<uint8_t,3>> byte_inputs_channel_1)
 {
     // Access the shared queue
     ReadingQueue& reading_queue = ReadingQueue::getInstance();
@@ -226,42 +225,9 @@ void AD7124::send_data_to_main_thread(
     // Now that we have data in the channels, let's handle mailing
     if (reading_queue.mail_box.empty()) {
         ReadingQueue::mail_t* mail = reading_queue.mail_box.try_alloc();
-        
-        // If both channels have reached the target size
-        if ((byte_inputs_channel_0.size() == model_input_size) && (byte_inputs_channel_1.size() == model_input_size)) {
-            // Prefer channel_0 first
-            mail->inputs = byte_inputs_channel_0;
-            byte_inputs_channel_0.clear();
-            mail->channel = 0;  // Indicate the channel
-            reading_queue.mail_box.put(mail); 
-            
-            while (!reading_queue.mail_box.empty()) {
-                // Wait until first mail processed
-                thread_sleep_for(1);  
-            }
-
-            // Then assign channel_1 for the next mail
-            ReadingQueue::mail_t* next_mail = reading_queue.mail_box.try_alloc();
-            next_mail->inputs = byte_inputs_channel_1;
-                byte_inputs_channel_1.clear();
-            next_mail->channel = 1;  // Indicate the channel
-            
-            reading_queue.mail_box.put(next_mail);  // Put the second mail (for channel_1)
-        }
-        // If only channel_0 has the required size, send it
-        else if (byte_inputs_channel_0.size() == model_input_size) {
-            mail->inputs = byte_inputs_channel_0;
-            byte_inputs_channel_0.clear();
-            mail->channel = 0;
-            reading_queue.mail_box.put(mail);
-        }
-        // If only channel_1 has the required size, send it
-        else if (byte_inputs_channel_1.size() == model_input_size) {
-            mail->inputs = byte_inputs_channel_1;
-            byte_inputs_channel_1.clear();
-            mail->channel = 1;
-            reading_queue.mail_box.put(mail);
-        }
+        mail->inputs_ch0 = byte_inputs_channel_0;
+        mail->inputs_ch1 = byte_inputs_channel_1;
+        reading_queue.mail_box.put(mail);
     }
 
 }
@@ -273,22 +239,26 @@ void AD7124::send_data_to_main_thread(
  */
 void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, unsigned int vector_size){
 
-    Timer timer;
-    unsigned int collection_interval = downsampling_rate / vector_size;
+    float collection_interval = static_cast<float>(downsampling_rate) / vector_size;
+    int collection_interval_ms = static_cast<int>(collection_interval * 1000);
     std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
     std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
-    unsigned int circular_buffer_size = 100;
+    unsigned int internal_circular_buffer_size = 100;
 
     while (true){ // Collect values forever
 
-        for (unsigned int i = 0; i < vector_size; ++i) {
+        while ((byte_inputs_channel_0.size() < vector_size) || (byte_inputs_channel_1.size() < vector_size)){
             std::vector<std::array<uint8_t,3>> temp_values_channel_0;
             std::vector<std::array<uint8_t,3>> temp_values_channel_1;
+            
+            Timer timer;
             timer.reset();
             timer.start();
-            
-            while (timer.elapsed_time().count() < (collection_interval * 1000)){ // Convert seconds to milliseconds
-                
+            auto start_time = timer.elapsed_time();
+                        
+            while (std::chrono::duration_cast<std::chrono::milliseconds>(timer.elapsed_time() - start_time).count() < collection_interval_ms){
+                //printf("%lld, %d, %d\n",timer.elapsed_time().count(), collection_interval_ms, counter);
+
                 while(m_drdy == 0){
                     wait_us(1);
                 }
@@ -305,7 +275,7 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
                 std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
                             
                 if(data[3] == 0){
-                    if(temp_values_channel_0.size() < circular_buffer_size){
+                    if(temp_values_channel_0.size() < internal_circular_buffer_size){
                         // Add new value
                         temp_values_channel_0.push_back(new_bytes);
                     }
@@ -318,7 +288,7 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
                 }
 
                 if(data[3] == 1){
-                    if(temp_values_channel_1.size() < circular_buffer_size){
+                    if(temp_values_channel_1.size() < internal_circular_buffer_size){
                         // Add new value
                         temp_values_channel_1.push_back(new_bytes);
                     }
@@ -329,14 +299,32 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
                     }
                     
                 }
-
                 thread_sleep_for(1); // to avoid CPU exhaustion
             }
 
-            byte_inputs_channel_0.push_back(Preprocessing::computeMean(temp_values_channel_0));
-            byte_inputs_channel_1.push_back(Preprocessing::computeMean(temp_values_channel_1));
+            timer.stop();
+            timer.reset();
+
+            if(byte_inputs_channel_0.size() < vector_size){
+                byte_inputs_channel_0.push_back(Preprocessing::computeMean(temp_values_channel_0));
+            }
+            else{
+                byte_inputs_channel_0.erase(byte_inputs_channel_0.begin());
+                byte_inputs_channel_0.push_back(Preprocessing::computeMean(temp_values_channel_0));
+            }
+
+            if(byte_inputs_channel_1.size() < vector_size){
+                byte_inputs_channel_1.push_back(Preprocessing::computeMean(temp_values_channel_1));
+            }
+            else{
+                byte_inputs_channel_1.erase(byte_inputs_channel_1.begin());
+                byte_inputs_channel_1.push_back(Preprocessing::computeMean(temp_values_channel_1));
+            }
+            
         }
+        printf("send\n");
+        //exit(1);
         
-        send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1, vector_size);
+    //send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1);
     }
 }

@@ -20,19 +20,24 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "interfaces/SendingQueue.h"
 #include "model_executor/ModelExecutor.h"
 #include "serial_mail_sender/SerialMailSender.h"
+#include "preprocessing/Preprocessing.h"
 
 // Utility Headers
 #include "utils/Conversion.h"
 #include "utils/logger.h"
 
 // *** DEFINE GLOBAL CONSTANTS ***
-#define DOWNSAMPLING_RATE 600 // 10 min in seconds
+#define DOWNSAMPLING_RATE 60 // 1 min in seconds
 #define VECTOR_SIZE 100 // So, we get 100 values from adc each 10 min
 
 // CONVERSION
 #define DATABITS 8388608
 #define VREF 2.5
 #define GAIN 4.0
+
+// MIN-MAX-SCALING
+#define MAX_VALUE 200
+#define MIN_VALUE -200
 
 // ADC
 #define SPI_FREQUENCY 10000000 // 1MHz
@@ -86,7 +91,7 @@ int main()
 		ReadingQueue& reading_queue = ReadingQueue::getInstance();
 
 		// Access the shared queue
-		SendingQueue& sending_queue = SendingQueue::getInstance();
+		//SendingQueue& sending_queue = SendingQueue::getInstance();
 
 		auto mail = reading_queue.mail_box.try_get_for(rtos::Kernel::Clock::duration_u32::max());
 
@@ -96,35 +101,40 @@ int main()
 		    ReadingQueue::mail_t* reading_mail = mail;
 
 			// Store reading data temporary
-			std::vector<std::array<uint8_t, 3>> inputs_as_bytes = reading_mail->inputs;
-			bool channel = reading_mail->channel;
+			std::vector<std::array<uint8_t, 3>> inputs_as_bytes_ch0 = reading_mail->inputs_ch0;
+			std::vector<std::array<uint8_t, 3>> inputs_as_bytes_ch1 = reading_mail->inputs_ch1;
 
 			// Free the allocated mail to avoid memory leaks
 			// make mail box empty
 			reading_queue.mail_box.free(reading_mail); 
 				
 			// Convert received bytes to floats
-			std::vector<float> inputs = get_analog_inputs(inputs_as_bytes, DATABITS, VREF, GAIN);
+			// std::vector<float> inputs_ch0_mv = get_analog_inputs(inputs_as_bytes_ch0, DATABITS, VREF, GAIN);
+			// std::vector<float> inputs_ch1_mv = get_analog_inputs(inputs_as_bytes_ch1, DATABITS, VREF, GAIN);
+
+			// // Min-Max Scaling
+			// std::vector<float> inputs_ch0_scaled = Preprocessing::minMaxScale(inputs_ch0_mv, MIN_VALUE, MAX_VALUE);
+			// std::vector<float> inputs_ch1_scaled = Preprocessing::minMaxScale(inputs_ch1_mv, MIN_VALUE, MAX_VALUE);
 
 			// Execute Model with received inputs
-			std::vector<float> results = executor.run_model(inputs);
+			//std::vector<float> results_ch0 = executor.run_model(inputs_ch0_scaled);
 
-			while (!sending_queue.mail_box.empty()) {
-                // Wait until sending queue is empty
-                thread_sleep_for(1);
-				printf("Wait for the sending queue to become empty.\n");
-            }
+			// while (!sending_queue.mail_box.empty()) {
+            //     // Wait until sending queue is empty
+            //     thread_sleep_for(1);
+			// 	printf("Wait for the sending queue to become empty.\n");
+            // }
 		    
-			if (sending_queue.mail_box.empty()) {
-				SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
-				sending_mail->inputs = inputs_as_bytes;
-				sending_mail->classification = results;
-				sending_mail->classification_active = true;
-				sending_mail->channel = channel;
-				sending_queue.mail_box.put(sending_mail); 
-			}
-			counter = counter + 1;
-			//printf("Counter: %d\n", counter);
+			// if (sending_queue.mail_box.empty()) {
+			// 	SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
+			// 	sending_mail->inputs = inputs_as_bytes_ch0;
+			// 	sending_mail->classification = results_ch0;
+			// 	sending_mail->classification_active = true;
+			// 	sending_mail->channel = 0;
+			// 	sending_queue.mail_box.put(sending_mail); 
+			// }
+			// counter = counter + 1;
+			printf("Counter: %d\n", counter);
 			//print_heap_stats();
 		}
 		thread_sleep_for(10);

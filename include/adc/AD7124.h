@@ -102,8 +102,7 @@ class AD7124: private mbed::NonCopyable<AD7124>{
          */
         void send_data_to_main_thread(
             std::vector<std::array<uint8_t, 3>> byte_inputs_channel_0,
-            std::vector<std::array<uint8_t, 3>> byte_inputs_channel_1,
-            unsigned int model_input_size
+            std::vector<std::array<uint8_t, 3>> byte_inputs_channel_1
         );
 };
 #endif
