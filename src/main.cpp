@@ -73,6 +73,23 @@ void print_heap_stats() {
 
 int main()
 {	
+	std::vector<float> test_input_vector = {
+		0.3148, -0.2392,  1.9567,  0.9869,  0.0050,  1.2305,  1.1584,
+		-0.3791, -0.4159,  0.6352,  0.5685,  1.0393,  1.5020, -0.1033,
+		0.8617, -1.5182, -1.1849, -1.7219,  1.7003, -0.0118,  0.0657,
+		-0.5634, -0.0981, -0.4158,  0.3380,  1.0453,  0.9805, -1.2600,
+		-1.3031, -1.1824,  0.3772,  0.1872,  0.3362, -0.0430,  0.1310,
+		0.4116, -0.5709,  0.2433,  1.6742,  0.5843, -0.9308, -0.5684,
+		-0.5613, -1.6491,  0.4206, -0.9054,  0.7312, -1.5096, -0.3996,
+		-0.8861, -0.9108, -0.3805, -0.6605, -0.5171, -1.0995, -0.3569,
+		1.5997, -2.5390, -2.4954, -0.7654,  1.4457,  1.2585,  0.1363,
+		-0.1437, -0.0370,  0.6101, -1.1453,  1.4333, -1.2200,  0.9154,
+		0.6001,  0.4928,  1.5454,  0.0624, -0.7268,  0.6277,  0.8344,
+		-0.1834, -0.2857, -0.9900, -0.8002,  0.2790,  1.1976, -0.6656,
+		-1.5403, -0.5115,  0.0698, -1.4269,  0.2222,  0.3240,  0.6256,
+		1.6387, -1.6100,  0.1028,  0.1044, -0.4829, -0.2006, -2.0888,
+		-0.4376,  1.2862
+	};
 
 	// Start reading data from ADC Thread
 	reading_data_thread.start(callback(get_input_model_values_from_adc));
@@ -115,8 +132,8 @@ int main()
 			std::vector<float> inputs_ch1_scaled = Preprocessing::minMaxScale(inputs_ch1_mv, MIN_VALUE, MAX_VALUE);
 
 			// Execute Model with received inputs
-			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_scaled);
-			std::vector<float> results_ch1 = executor.run_model(inputs_ch1_scaled);
+			std::vector<float> results_ch0 = executor.run_model(test_input_vector);
+			std::vector<float> results_ch1 = executor.run_model(test_input_vector);
 
 			while (!sending_queue.mail_box.empty()) {
                 // Wait until sending queue is empty
