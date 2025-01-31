@@ -5,6 +5,7 @@
 #include "utils/utils.h"
 #include "utils/logger.h"
 #include "interfaces/ReadingQueue.h"
+#include <chrono>
 
 
 void AD7124::ctrl_reg(char RW){
@@ -239,24 +240,22 @@ void AD7124::send_data_to_main_thread(
  */
 void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, unsigned int vector_size){
 
-    float collection_interval = static_cast<float>(downsampling_rate) / vector_size;
-    int collection_interval_ms = static_cast<int>(collection_interval * 1000);
-    std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
-    std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
+    const float collection_interval = static_cast<float>(downsampling_rate) / vector_size;
+    const uint32_t collection_interval_ms = static_cast<uint32_t>(collection_interval * 1000);
+
     unsigned int internal_circular_buffer_size = 100;
 
     while (true){ // Collect values forever
+        std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
+        std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
 
         while ((byte_inputs_channel_0.size() < vector_size) || (byte_inputs_channel_1.size() < vector_size)){
             std::vector<std::array<uint8_t,3>> temp_values_channel_0;
             std::vector<std::array<uint8_t,3>> temp_values_channel_1;
             
-            Timer timer;
-            timer.reset();
-            timer.start();
-            auto start_time = timer.elapsed_time();
+            auto start_time = rtos::Kernel::Clock::now();
                         
-            while (std::chrono::duration_cast<std::chrono::milliseconds>(timer.elapsed_time() - start_time).count() < collection_interval_ms){
+               while (std::chrono::duration_cast<std::chrono::milliseconds>(rtos::Kernel::Clock::now() - start_time).count() < collection_interval_ms){
                 //printf("%lld, %d, %d\n",timer.elapsed_time().count(), collection_interval_ms, counter);
 
                 while(m_drdy == 0){
@@ -302,9 +301,6 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
                 thread_sleep_for(1); // to avoid CPU exhaustion
             }
 
-            timer.stop();
-            timer.reset();
-
             if(byte_inputs_channel_0.size() < vector_size){
                 byte_inputs_channel_0.push_back(Preprocessing::computeMean(temp_values_channel_0));
             }
@@ -322,9 +318,9 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
             }
             
         }
-        printf("send\n");
-        //exit(1);
         
-    //send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1);
+        //exit(1);
+        printf("send\n");
+        //send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1);
     }
 }

@@ -27,7 +27,7 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "utils/logger.h"
 
 // *** DEFINE GLOBAL CONSTANTS ***
-#define DOWNSAMPLING_RATE 60 // 1 min in seconds
+#define DOWNSAMPLING_RATE 10 // 1 min in seconds
 #define VECTOR_SIZE 100 // So, we get 100 values from adc each 10 min
 
 // CONVERSION
