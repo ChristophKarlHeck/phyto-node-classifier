@@ -20,7 +20,7 @@ public:
     } mail_t;
 
     // Mail object for inter-thread communication
-    Mail<mail_t, 5> mail_box;  // Queue with size 4, can be adjusted as necessary
+    Mail<mail_t, 20> mail_box;  // Queue with size 4, can be adjusted as necessary
 
 private:
     // Private constructor to prevent direct instantiation

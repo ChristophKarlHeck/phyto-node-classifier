@@ -319,8 +319,6 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
             
         }
         
-        //exit(1);
-        printf("send\n");
-        //send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1);
+        send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1);
     }
 }

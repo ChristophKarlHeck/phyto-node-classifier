@@ -80,18 +80,16 @@ int main()
 	// Start sending Thread
 	sending_data_thread.start(callback(send_output_to_data_sink));
 
-	int counter = 0;
-
     while (true) {
 
 		// Instantiate and initialize the model executor
-		ModelExecutor& executor = ModelExecutor::getInstance(1024); // Pass the desired pool size
+		ModelExecutor& executor = ModelExecutor::getInstance(16384); // Pass the desired pool size
 		
 		// Access the shared ReadingQueue instance
 		ReadingQueue& reading_queue = ReadingQueue::getInstance();
 
 		// Access the shared queue
-		//SendingQueue& sending_queue = SendingQueue::getInstance();
+		SendingQueue& sending_queue = SendingQueue::getInstance();
 
 		auto mail = reading_queue.mail_box.try_get_for(rtos::Kernel::Clock::duration_u32::max());
 
@@ -109,35 +107,33 @@ int main()
 			reading_queue.mail_box.free(reading_mail); 
 				
 			// Convert received bytes to floats
-			// std::vector<float> inputs_ch0_mv = get_analog_inputs(inputs_as_bytes_ch0, DATABITS, VREF, GAIN);
-			// std::vector<float> inputs_ch1_mv = get_analog_inputs(inputs_as_bytes_ch1, DATABITS, VREF, GAIN);
+			std::vector<float> inputs_ch0_mv = get_analog_inputs(inputs_as_bytes_ch0, DATABITS, VREF, GAIN);
+			std::vector<float> inputs_ch1_mv = get_analog_inputs(inputs_as_bytes_ch1, DATABITS, VREF, GAIN);
 
-			// // Min-Max Scaling
-			// std::vector<float> inputs_ch0_scaled = Preprocessing::minMaxScale(inputs_ch0_mv, MIN_VALUE, MAX_VALUE);
-			// std::vector<float> inputs_ch1_scaled = Preprocessing::minMaxScale(inputs_ch1_mv, MIN_VALUE, MAX_VALUE);
+			// Min-Max Scaling
+			std::vector<float> inputs_ch0_scaled = Preprocessing::minMaxScale(inputs_ch0_mv, MIN_VALUE, MAX_VALUE);
+			std::vector<float> inputs_ch1_scaled = Preprocessing::minMaxScale(inputs_ch1_mv, MIN_VALUE, MAX_VALUE);
 
 			// Execute Model with received inputs
-			//std::vector<float> results_ch0 = executor.run_model(inputs_ch0_scaled);
+			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_scaled);
+			std::vector<float> results_ch1 = executor.run_model(inputs_ch1_scaled);
 
-			// while (!sending_queue.mail_box.empty()) {
-            //     // Wait until sending queue is empty
-            //     thread_sleep_for(1);
-			// 	printf("Wait for the sending queue to become empty.\n");
-            // }
+			while (!sending_queue.mail_box.empty()) {
+                // Wait until sending queue is empty
+                thread_sleep_for(1);
+				printf("Wait for the sending queue to become empty.\n");
+            }
 		    
-			// if (sending_queue.mail_box.empty()) {
-			// 	SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
-			// 	sending_mail->inputs = inputs_as_bytes_ch0;
-			// 	sending_mail->classification = results_ch0;
-			// 	sending_mail->classification_active = true;
-			// 	sending_mail->channel = 0;
-			// 	sending_queue.mail_box.put(sending_mail); 
-			// }
-			// counter = counter + 1;
-			printf("Counter: %d\n", counter);
-			//print_heap_stats();
+			if (sending_queue.mail_box.empty()) {
+				SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
+				sending_mail->inputs = inputs_as_bytes_ch0;
+				sending_mail->classification = results_ch0;
+				sending_mail->classification_active = true;
+				sending_mail->channel = 0;
+				sending_queue.mail_box.put(sending_mail); 
+			}
+			print_heap_stats();
 		}
-		thread_sleep_for(10);
 	}
 
 	// main() is expected to loop forever.
