@@ -143,10 +143,10 @@ int main()
 		    
 			if (sending_queue.mail_box.empty()) {
 				SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
-				sending_mail->inputs = inputs_as_bytes_ch0;
-				sending_mail->classification = results_ch0;
-				sending_mail->classification_active = true;
-				sending_mail->channel = 0;
+				sending_mail->inputs_ch0 = inputs_as_bytes_ch0;
+				sending_mail->inputs_ch1 = inputs_as_bytes_ch1;
+				sending_mail->classification_ch0 = results_ch0;
+				sending_mail->classification_ch1 = results_ch1;
 				sending_queue.mail_box.put(sending_mail); 
 			}
 			print_heap_stats();

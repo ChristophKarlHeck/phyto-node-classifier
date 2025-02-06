@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include "mbed.h"
-#include "serial_mail_sender/SerialMailGenerated.h" 
+#include "serial_mail_sender/serial_mail_generated.h" 
 #include "flatbuffers/flatbuffers.h"
 #include "interfaces/SendingQueue.h"
 

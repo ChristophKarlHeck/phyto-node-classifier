@@ -8,9 +8,9 @@
 
 // Ensure the included flatbuffers.h is the same version as when this file was
 // generated, otherwise it may not be compatible.
-static_assert(FLATBUFFERS_VERSION_MAJOR == 24 &&
-              FLATBUFFERS_VERSION_MINOR == 3 &&
-              FLATBUFFERS_VERSION_REVISION == 25,
+static_assert(FLATBUFFERS_VERSION_MAJOR == 25 &&
+              FLATBUFFERS_VERSION_MINOR == 1 &&
+              FLATBUFFERS_VERSION_REVISION == 24,
              "Non-compatible flatbuffers version included");
 
 namespace SerialMail {
@@ -52,31 +52,33 @@ FLATBUFFERS_STRUCT_END(Value, 3);
 struct SerialMail FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Table {
   typedef SerialMailBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_INPUTS = 4,
-    VT_CLASSIFICATION = 6,
-    VT_CLASSIFICATION_ACTIVE = 8,
-    VT_CHANNEL = 10
+    VT_INPUTS_CH0 = 4,
+    VT_INPUTS_CH1 = 6,
+    VT_CLASSIFICATION_CH0 = 8,
+    VT_CLASSIFICATION_CH1 = 10
   };
-  const ::flatbuffers::Vector<const Value *> *inputs() const {
-    return GetPointer<const ::flatbuffers::Vector<const Value *> *>(VT_INPUTS);
+  const ::flatbuffers::Vector<const Value *> *inputs_ch0() const {
+    return GetPointer<const ::flatbuffers::Vector<const Value *> *>(VT_INPUTS_CH0);
   }
-  const ::flatbuffers::Vector<float> *classification() const {
-    return GetPointer<const ::flatbuffers::Vector<float> *>(VT_CLASSIFICATION);
+  const ::flatbuffers::Vector<const Value *> *inputs_ch1() const {
+    return GetPointer<const ::flatbuffers::Vector<const Value *> *>(VT_INPUTS_CH1);
   }
-  bool classification_active() const {
-    return GetField<uint8_t>(VT_CLASSIFICATION_ACTIVE, 0) != 0;
+  const ::flatbuffers::Vector<float> *classification_ch0() const {
+    return GetPointer<const ::flatbuffers::Vector<float> *>(VT_CLASSIFICATION_CH0);
   }
-  bool channel() const {
-    return GetField<uint8_t>(VT_CHANNEL, 0) != 0;
+  const ::flatbuffers::Vector<float> *classification_ch1() const {
+    return GetPointer<const ::flatbuffers::Vector<float> *>(VT_CLASSIFICATION_CH1);
   }
   bool Verify(::flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_INPUTS) &&
-           verifier.VerifyVector(inputs()) &&
-           VerifyOffset(verifier, VT_CLASSIFICATION) &&
-           verifier.VerifyVector(classification()) &&
-           VerifyField<uint8_t>(verifier, VT_CLASSIFICATION_ACTIVE, 1) &&
-           VerifyField<uint8_t>(verifier, VT_CHANNEL, 1) &&
+           VerifyOffset(verifier, VT_INPUTS_CH0) &&
+           verifier.VerifyVector(inputs_ch0()) &&
+           VerifyOffset(verifier, VT_INPUTS_CH1) &&
+           verifier.VerifyVector(inputs_ch1()) &&
+           VerifyOffset(verifier, VT_CLASSIFICATION_CH0) &&
+           verifier.VerifyVector(classification_ch0()) &&
+           VerifyOffset(verifier, VT_CLASSIFICATION_CH1) &&
+           verifier.VerifyVector(classification_ch1()) &&
            verifier.EndTable();
   }
 };
@@ -85,17 +87,17 @@ struct SerialMailBuilder {
   typedef SerialMail Table;
   ::flatbuffers::FlatBufferBuilder &fbb_;
   ::flatbuffers::uoffset_t start_;
-  void add_inputs(::flatbuffers::Offset<::flatbuffers::Vector<const Value *>> inputs) {
-    fbb_.AddOffset(SerialMail::VT_INPUTS, inputs);
+  void add_inputs_ch0(::flatbuffers::Offset<::flatbuffers::Vector<const Value *>> inputs_ch0) {
+    fbb_.AddOffset(SerialMail::VT_INPUTS_CH0, inputs_ch0);
   }
-  void add_classification(::flatbuffers::Offset<::flatbuffers::Vector<float>> classification) {
-    fbb_.AddOffset(SerialMail::VT_CLASSIFICATION, classification);
+  void add_inputs_ch1(::flatbuffers::Offset<::flatbuffers::Vector<const Value *>> inputs_ch1) {
+    fbb_.AddOffset(SerialMail::VT_INPUTS_CH1, inputs_ch1);
   }
-  void add_classification_active(bool classification_active) {
-    fbb_.AddElement<uint8_t>(SerialMail::VT_CLASSIFICATION_ACTIVE, static_cast<uint8_t>(classification_active), 0);
+  void add_classification_ch0(::flatbuffers::Offset<::flatbuffers::Vector<float>> classification_ch0) {
+    fbb_.AddOffset(SerialMail::VT_CLASSIFICATION_CH0, classification_ch0);
   }
-  void add_channel(bool channel) {
-    fbb_.AddElement<uint8_t>(SerialMail::VT_CHANNEL, static_cast<uint8_t>(channel), 0);
+  void add_classification_ch1(::flatbuffers::Offset<::flatbuffers::Vector<float>> classification_ch1) {
+    fbb_.AddOffset(SerialMail::VT_CLASSIFICATION_CH1, classification_ch1);
   }
   explicit SerialMailBuilder(::flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -110,32 +112,34 @@ struct SerialMailBuilder {
 
 inline ::flatbuffers::Offset<SerialMail> CreateSerialMail(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    ::flatbuffers::Offset<::flatbuffers::Vector<const Value *>> inputs = 0,
-    ::flatbuffers::Offset<::flatbuffers::Vector<float>> classification = 0,
-    bool classification_active = false,
-    bool channel = false) {
+    ::flatbuffers::Offset<::flatbuffers::Vector<const Value *>> inputs_ch0 = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<const Value *>> inputs_ch1 = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<float>> classification_ch0 = 0,
+    ::flatbuffers::Offset<::flatbuffers::Vector<float>> classification_ch1 = 0) {
   SerialMailBuilder builder_(_fbb);
-  builder_.add_classification(classification);
-  builder_.add_inputs(inputs);
-  builder_.add_channel(channel);
-  builder_.add_classification_active(classification_active);
+  builder_.add_classification_ch1(classification_ch1);
+  builder_.add_classification_ch0(classification_ch0);
+  builder_.add_inputs_ch1(inputs_ch1);
+  builder_.add_inputs_ch0(inputs_ch0);
   return builder_.Finish();
 }
 
 inline ::flatbuffers::Offset<SerialMail> CreateSerialMailDirect(
     ::flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<Value> *inputs = nullptr,
-    const std::vector<float> *classification = nullptr,
-    bool classification_active = false,
-    bool channel = false) {
-  auto inputs__ = inputs ? _fbb.CreateVectorOfStructs<Value>(*inputs) : 0;
-  auto classification__ = classification ? _fbb.CreateVector<float>(*classification) : 0;
+    const std::vector<Value> *inputs_ch0 = nullptr,
+    const std::vector<Value> *inputs_ch1 = nullptr,
+    const std::vector<float> *classification_ch0 = nullptr,
+    const std::vector<float> *classification_ch1 = nullptr) {
+  auto inputs_ch0__ = inputs_ch0 ? _fbb.CreateVectorOfStructs<Value>(*inputs_ch0) : 0;
+  auto inputs_ch1__ = inputs_ch1 ? _fbb.CreateVectorOfStructs<Value>(*inputs_ch1) : 0;
+  auto classification_ch0__ = classification_ch0 ? _fbb.CreateVector<float>(*classification_ch0) : 0;
+  auto classification_ch1__ = classification_ch1 ? _fbb.CreateVector<float>(*classification_ch1) : 0;
   return CreateSerialMail(
       _fbb,
-      inputs__,
-      classification__,
-      classification_active,
-      channel);
+      inputs_ch0__,
+      inputs_ch1__,
+      classification_ch0__,
+      classification_ch1__);
 }
 
 inline const SerialMail *GetSerialMail(const void *buf) {

@@ -54,19 +54,26 @@ void SerialMailSender::sendMail(void) {
             SendingQueue::mail_t *sending_mail = mail;
 
             // Create Flatbuffers vector of bytes
-            std::vector<SerialMail::Value> raw_input_bytes = convertToSerialMailValues(sending_mail->inputs);
-            auto inputs = builder.CreateVectorOfStructs(raw_input_bytes.data(), raw_input_bytes.size());
+            std::vector<SerialMail::Value> raw_input_bytes_ch0 = convertToSerialMailValues(sending_mail->inputs_ch0);
+            auto inputs_ch0 = builder.CreateVectorOfStructs(raw_input_bytes_ch0.data(), raw_input_bytes_ch0.size());
+
+            std::vector<SerialMail::Value> raw_input_bytes_ch1 = convertToSerialMailValues(sending_mail->inputs_ch1);
+            auto inputs_ch1 = builder.CreateVectorOfStructs(raw_input_bytes_ch1.data(), raw_input_bytes_ch1.size());
 
             // Create Flatbuffers float array
-            std::vector<float> classification_values = sending_mail->classification;
-            auto classification = builder.CreateVector(classification_values.data(), classification_values.size());
+            std::vector<float> classification_values_ch0 = sending_mail->classification_ch0;
+            auto classification_ch0 = builder.CreateVector(classification_values_ch0.data(), classification_values_ch0.size());
+
+            // Create Flatbuffers float array
+            std::vector<float> classification_values_ch1 = sending_mail->classification_ch1;
+            auto classification_ch1 = builder.CreateVector(classification_values_ch1.data(), classification_values_ch1.size());
 
             // Channel and Classification active
-            bool classification_active = sending_mail->classification_active;
-            bool channel = sending_mail->channel;
+            // bool classification_active = sending_mail->classification_active;
+            // bool channel = sending_mail->channel;
 
             // Create the SerialMail object
-            auto orc = CreateSerialMail(builder, inputs, classification, classification_active, channel);
+            auto orc = CreateSerialMail(builder, inputs_ch0, inputs_ch1, classification_ch0, classification_ch1);
             builder.Finish(orc);
 
             // Get the buffer pointer and size

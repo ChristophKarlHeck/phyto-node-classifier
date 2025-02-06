@@ -54,7 +54,7 @@ target_include_directories(PhytoClassifier
      PUBLIC 
           ${CMAKE_CURRENT_SOURCE_DIR}/include #need it for executorch includes and logger.h
           /home/chris/executorch_v030/ #for executorch headers
-          ${CMAKE_CURRENT_SOURCE_DIR}/libs/flatbuffers/include
+          /home/chris/flatbuffers/include
           ${CMAKE_CURRENT_SOURCE_DIR}/models     
 )
 
