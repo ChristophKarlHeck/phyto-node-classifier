@@ -52,7 +52,7 @@ void et_pal_emit_log_message(
     size_t line,
     const char* message,
     __ET_UNUSED size_t length) {
-  fprintf(stderr, "%c executorch:%s:%zu] %s\n", level, filename, line, message);
+  //fprintf(stderr, "%c executorch:%s:%zu] %s\n", level, filename, line, message);
 }
 
 // Assume SystemCoreClock is defined correctly for your platform.
@@ -204,18 +204,18 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 			Tensor t = outputs[i].toTensor();
 			for (int j = 0; j < outputs[i].toTensor().numel(); ++j) {
 			if (t.scalar_type() == ScalarType::Int) {
-				printf(
-					"Output[%d][%d]: %d\n",
-					i,
-					j,
-					outputs[i].toTensor().const_data_ptr<int>()[j]);
+				// printf(
+				// 	"Output[%d][%d]: %d\n",
+				// 	i,
+				// 	j,
+				// 	outputs[i].toTensor().const_data_ptr<int>()[j]);
 				results.push_back(outputs[i].toTensor().const_data_ptr<int>()[j]);
 			} else {
-				printf(
-					"Output[%d][%d]: %f\n",
-					i,
-					j,
-					outputs[i].toTensor().const_data_ptr<float>()[j]);
+				// printf(
+				// 	"Output[%d][%d]: %f\n",
+				// 	i,
+				// 	j,
+				// 	outputs[i].toTensor().const_data_ptr<float>()[j]);
 				results.push_back(outputs[i].toTensor().const_data_ptr<float>()[j]);
 			}
 			}

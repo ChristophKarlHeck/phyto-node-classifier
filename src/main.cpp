@@ -27,8 +27,8 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "utils/logger.h"
 
 // *** DEFINE GLOBAL CONSTANTS ***
-#define DOWNSAMPLING_RATE 600 // 10 min in seconds
-#define VECTOR_SIZE 100 // So, we get 100 values from adc each 10 min
+#define DOWNSAMPLING_RATE 30 // 10 min in seconds
+#define VECTOR_SIZE 10 // So, we get 100 values from adc each 10 min
 
 // CONVERSION
 #define DATABITS 8388608
@@ -132,13 +132,13 @@ int main()
 			std::vector<float> inputs_ch1_scaled = Preprocessing::minMaxScale(inputs_ch1_mv, MIN_VALUE, MAX_VALUE);
 
 			// Execute Model with received inputs
-			std::vector<float> results_ch0 = executor.run_model(test_input_vector);
-			std::vector<float> results_ch1 = executor.run_model(test_input_vector);
+			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_scaled);
+			std::vector<float> results_ch1 = executor.run_model(inputs_ch1_scaled);
 
 			while (!sending_queue.mail_box.empty()) {
                 // Wait until sending queue is empty
                 thread_sleep_for(1);
-				printf("Wait for the sending queue to become empty.\n");
+				//printf("Wait for the sending queue to become empty.\n");
             }
 		    
 			if (sending_queue.mail_box.empty()) {
@@ -149,7 +149,7 @@ int main()
 				sending_mail->classification_ch1 = results_ch1;
 				sending_queue.mail_box.put(sending_mail); 
 			}
-			print_heap_stats();
+			// print_heap_stats();
 		}
 	}
 

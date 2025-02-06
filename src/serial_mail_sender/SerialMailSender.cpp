@@ -5,7 +5,7 @@
 // Initialize the static BufferedSerial instance (PC_1 = TX, PC_0 = RX)
 // Raspberry Pi: (GPIO 14 = TX, GPIO 15 = RX)
 // Connection TX-RX, RX-TX, GND-GND
-BufferedSerial SerialMailSender::m_serial_port(PC_1, PC_0, BAUDRATE);
+BufferedSerial SerialMailSender::m_serial_port(/*PC_1*/USBTX, /*PC_0*/USBRX, BAUDRATE);
 
 // Get the single instance of SerialMailSender
 SerialMailSender& SerialMailSender::getInstance(void) {
@@ -79,6 +79,11 @@ void SerialMailSender::sendMail(void) {
             // Get the buffer pointer and size
             uint8_t* buf = builder.GetBufferPointer();
             uint32_t size = builder.GetSize();
+
+            // Send a synchronization marker (e.g., 0xAAAA)
+            uint16_t sync_marker = 0xAAAA;
+            m_serial_port.write(reinterpret_cast<const char*>(&sync_marker), sizeof(sync_marker));
+
 
             // Send the size (4 bytes)
             m_serial_port.write(reinterpret_cast<const char*>(&size), sizeof(size));
