@@ -98,10 +98,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    <span class="comment">// The structure used for inter-thread communication</span></div>
 <div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="structSendingQueue_1_1mail__t.html">   15</a></span>    <span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>        std::vector&lt;std::array&lt;uint8_t, 3&gt;&gt; inputs;  <span class="comment">// Vector of downsampled analog values                             // Channel information</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        std::vector&lt;float&gt; classification;</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        <span class="keywordtype">bool</span> classification_active;</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        <span class="keywordtype">bool</span> channel;                              </div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>        std::vector&lt;std::array&lt;uint8_t, 3&gt;&gt; inputs_ch0;  <span class="comment">// Vector of downsampled analog values</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        std::vector&lt;std::array&lt;uint8_t, 3&gt;&gt; inputs_ch1;  </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        std::vector&lt;float&gt; classification_ch0;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        std::vector&lt;float&gt; classification_ch1;                              </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    } <a class="code hl_struct" href="structSendingQueue_1_1mail__t.html">mail_t</a>;</div>
 </div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
