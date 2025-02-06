@@ -245,80 +245,95 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
 
     unsigned int internal_circular_buffer_size = 100;
 
+    std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
+    std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
+
+    bool circular_buffer_triggered_0 = false;
+    bool circular_buffer_triggered_1 = false;
+
     while (true){ // Collect values forever
-        std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
-        std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
 
-        while ((byte_inputs_channel_0.size() < vector_size) || (byte_inputs_channel_1.size() < vector_size)){
-            std::vector<std::array<uint8_t,3>> temp_values_channel_0;
-            std::vector<std::array<uint8_t,3>> temp_values_channel_1;
+        std::vector<std::array<uint8_t,3>> temp_values_channel_0;
+        std::vector<std::array<uint8_t,3>> temp_values_channel_1;
             
-            auto start_time = rtos::Kernel::Clock::now();
+        auto start_time = rtos::Kernel::Clock::now();
                         
-               while (std::chrono::duration_cast<std::chrono::milliseconds>(rtos::Kernel::Clock::now() - start_time).count() < collection_interval_ms){
-                //printf("%lld, %d, %d\n",timer.elapsed_time().count(), collection_interval_ms, counter);
+        while (std::chrono::duration_cast<std::chrono::milliseconds>(rtos::Kernel::Clock::now() - start_time).count() < collection_interval_ms){
+            //printf("%lld, %d, %d\n",timer.elapsed_time().count(), collection_interval_ms, counter);
 
-                while(m_drdy == 0){
-                    wait_us(1);
-                }
-                while(m_drdy == 1){
-                    wait_us(1);
-                }
-
-                uint8_t data[4] = {0, 0, 0, 255};
-                for(int j = 0; j < 4; j++){
-                    // Sends 0x00 and simultaneously receives a byte from the SPI slave device.
-                    data[j] = m_spi.write(0x00);
-                }
-
-                std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
-                            
-                if(data[3] == 0){
-                    if(temp_values_channel_0.size() < internal_circular_buffer_size){
-                        // Add new value
-                        temp_values_channel_0.push_back(new_bytes);
-                    }
-                    else{
-                        // Replace the oldest value with the new value (circular buffer approach)
-                        temp_values_channel_0.erase(temp_values_channel_0.begin());
-                        temp_values_channel_0.push_back(new_bytes);
-                    }
-                    
-                }
-
-                if(data[3] == 1){
-                    if(temp_values_channel_1.size() < internal_circular_buffer_size){
-                        // Add new value
-                        temp_values_channel_1.push_back(new_bytes);
-                    }
-                    else{
-                        // Replace the oldest value with the new value (circular buffer approach)
-                        temp_values_channel_1.erase(temp_values_channel_1.begin());
-                        temp_values_channel_1.push_back(new_bytes);
-                    }
-                    
-                }
-                thread_sleep_for(1); // to avoid CPU exhaustion
+            while(m_drdy == 0){
+                 wait_us(1);
+            }
+            while(m_drdy == 1){
+                wait_us(1);
             }
 
+            uint8_t data[4] = {0, 0, 0, 255};
+            for(int j = 0; j < 4; j++){
+                // Sends 0x00 and simultaneously receives a byte from the SPI slave device.
+                data[j] = m_spi.write(0x00);
+            }
+
+            std::array<uint8_t, 3> new_bytes = {data[0], data[1], data[2]};
+                            
+            if(data[3] == 0){
+                if(temp_values_channel_0.size() < internal_circular_buffer_size){
+                    // Add new value
+                    temp_values_channel_0.push_back(new_bytes);
+                }
+                else{
+                    // Replace the oldest value with the new value (circular buffer approach)
+                    temp_values_channel_0.erase(temp_values_channel_0.begin());
+                    temp_values_channel_0.push_back(new_bytes);
+                }    
+            }
+
+            if(data[3] == 1){
+                if(temp_values_channel_1.size() < internal_circular_buffer_size){
+                    // Add new value
+                    temp_values_channel_1.push_back(new_bytes);
+                }
+                else{
+                    // Replace the oldest value with the new value (circular buffer approach)
+                    temp_values_channel_1.erase(temp_values_channel_1.begin());
+                    temp_values_channel_1.push_back(new_bytes);
+                }    
+            }
+            thread_sleep_for(1); // to avoid CPU exhaustion
+        }
+        if(!temp_values_channel_0.empty()){
+            auto mean_channel_0 = Preprocessing::computeMean(temp_values_channel_0);
+
             if(byte_inputs_channel_0.size() < vector_size){
-                byte_inputs_channel_0.push_back(Preprocessing::computeMean(temp_values_channel_0));
+                byte_inputs_channel_0.push_back(mean_channel_0);
             }
             else{
                 byte_inputs_channel_0.erase(byte_inputs_channel_0.begin());
-                byte_inputs_channel_0.push_back(Preprocessing::computeMean(temp_values_channel_0));
+                byte_inputs_channel_0.push_back(mean_channel_0);
+                circular_buffer_triggered_0 = true; // Circular buffer was used
             }
+        }
+
+        if(!temp_values_channel_1.empty()){
+            auto mean_channel_1 = Preprocessing::computeMean(temp_values_channel_1);
 
             if(byte_inputs_channel_1.size() < vector_size){
-                byte_inputs_channel_1.push_back(Preprocessing::computeMean(temp_values_channel_1));
+                byte_inputs_channel_1.push_back(mean_channel_1);
             }
             else{
                 byte_inputs_channel_1.erase(byte_inputs_channel_1.begin());
-                byte_inputs_channel_1.push_back(Preprocessing::computeMean(temp_values_channel_1));
+                byte_inputs_channel_1.push_back(mean_channel_1);
+                circular_buffer_triggered_1 = true; // Circular buffer was used
             }
-            
-        }
+        }   
         
-        send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1);
+        // **Send only when both buffers have replaced an old value**
+        if(circular_buffer_triggered_0 && circular_buffer_triggered_1){
+            send_data_to_main_thread(byte_inputs_channel_0, byte_inputs_channel_1);
+
+            // Reset flags after sending
+            circular_buffer_triggered_0 = false;
+            circular_buffer_triggered_1 = false;
+        }
     }
 }
