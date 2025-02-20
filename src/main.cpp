@@ -27,8 +27,8 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "utils/logger.h"
 
 // *** DEFINE GLOBAL CONSTANTS ***
-#define DOWNSAMPLING_RATE 30 // 10 min in seconds
-#define VECTOR_SIZE 10 // So, we get 100 values from adc each 10 min
+#define DOWNSAMPLING_RATE 600 // 10 min in seconds
+#define VECTOR_SIZE 100 // So, we get 100 values from adc each 10 min
 
 // CONVERSION
 #define DATABITS 8388608
@@ -36,8 +36,8 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #define GAIN 4.0
 
 // MIN-MAX-SCALING
-#define MAX_VALUE 200
-#define MIN_VALUE -200
+#define MAX_VALUE 0.2
+#define MIN_VALUE -0.2
 
 // ADC
 #define SPI_FREQUENCY 10000000 // 1MHz
@@ -111,6 +111,7 @@ int main()
 		auto mail = reading_queue.mail_box.try_get_for(rtos::Kernel::Clock::duration_u32::max());
 
 		if (mail) {
+			//print_heap_stats();
 
 		    // Retrieve the message from the mail box
 		    ReadingQueue::mail_t* reading_mail = mail;
@@ -149,7 +150,7 @@ int main()
 				sending_mail->classification_ch1 = results_ch1;
 				sending_queue.mail_box.put(sending_mail); 
 			}
-			// print_heap_stats();
+			//print_heap_stats();
 		}
 	}
 

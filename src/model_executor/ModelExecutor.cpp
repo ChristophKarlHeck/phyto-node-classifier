@@ -52,7 +52,7 @@ void et_pal_emit_log_message(
     size_t line,
     const char* message,
     __ET_UNUSED size_t length) {
-  //fprintf(stderr, "%c executorch:%s:%zu] %s\n", level, filename, line, message);
+  //fprintf(stderr, "%c executorch:%s:%zu] %s\n", level, filename, line, message); // Uncomment to enable ExecuTorch logs but consider that you pollute the serial connection to RAPI.
 }
 
 // Assume SystemCoreClock is defined correctly for your platform.
