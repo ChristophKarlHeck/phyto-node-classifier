@@ -30,6 +30,7 @@ set(SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/Conversion.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/serial_mail_sender/SerialMailSender.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/preprocessing/Preprocessing.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/preprocessing/OnlineMean.cpp
 )
 
 add_executable(PhytoClassifier ${SOURCES})
