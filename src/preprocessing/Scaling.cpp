@@ -1,4 +1,4 @@
-#include "preprocessing/Preprocessing.h"
+#include "preprocessing/Scaling.h"
 
 std::vector<float> Preprocessing::minMaxScale(std::vector<float> inputs, float minValue, float maxValue) {
     for (auto& value : inputs) {

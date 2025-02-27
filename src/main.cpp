@@ -20,7 +20,7 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "interfaces/SendingQueue.h"
 #include "model_executor/ModelExecutor.h"
 #include "serial_mail_sender/SerialMailSender.h"
-#include "preprocessing/Preprocessing.h"
+#include "preprocessing/Scaling.h"
 
 // Utility Headers
 #include "utils/Conversion.h"
