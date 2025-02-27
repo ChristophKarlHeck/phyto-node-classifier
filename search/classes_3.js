@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['preprocessing_0',['Preprocessing',['../classPreprocessing.html',1,'']]]
+  ['onlinemean_0',['OnlineMean',['../classOnlineMean.html',1,'']]]
 ];
