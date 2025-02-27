@@ -43,11 +43,6 @@ uint8_t OnlineMean::round_to_uint8(float value) {
 
 std::array<uint8_t, 3> OnlineMean::get_mean(void) const {
 
-    std::cout << "Mean before rounding: { "
-                << m_mean_byte_0 << ", "
-                << m_mean_byte_1 << ", "
-                << m_mean_byte_2 << " }\n";
-
     uint8_t byte_0 = round_to_uint8(m_mean_byte_0);
     uint8_t byte_1 = round_to_uint8(m_mean_byte_1);
     uint8_t byte_2 = round_to_uint8(m_mean_byte_2);
