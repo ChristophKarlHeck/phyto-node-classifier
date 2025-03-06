@@ -1,11 +1,42 @@
 #include "preprocessing/Scaling.h"
+#include <cmath>
+#include <numeric> 
 
 std::vector<float> Preprocessing::minMaxScale(std::vector<float> inputs, float minValue, float maxValue) {
+    if (inputs.empty()) return {}; // Handle empty input case
+
     for (auto& value : inputs) {
         value = (value - minValue) / (maxValue - minValue);
     }
     return inputs;
 }
+
+std::vector<float> Preprocessing::zScoreNormalization(std::vector<float> inputs) {
+        if (inputs.empty()) return {}; // Handle empty input case
+
+        // Compute mean
+        float mean = std::accumulate(inputs.begin(), inputs.end(), 0.0f) / inputs.size();
+
+        // Compute standard deviation
+        float variance = 0.0f;
+        for (float val : inputs) {
+            variance += (val - mean) * (val - mean);
+        }
+        variance /= inputs.size();
+        float stddev = std::sqrt(variance);
+
+        // Avoid division by zero
+        if (stddev == 0.0f) return std::vector<float>(inputs.size(), 0.0f);
+
+        // Normalize
+        std::vector<float> normalized;
+        normalized.reserve(inputs.size());
+        for (float val : inputs) {
+            normalized.push_back((val - mean) / stddev);
+        }
+
+        return normalized;
+    }
 
 std::array<uint8_t, 3> Preprocessing::computeMean(std::vector<std::array<uint8_t,3>> values) {
     if (values.empty()) {

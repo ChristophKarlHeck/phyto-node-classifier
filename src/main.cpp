@@ -129,8 +129,8 @@ int main()
 			std::vector<float> inputs_ch1_mv = get_analog_inputs(inputs_as_bytes_ch1, DATABITS, VREF, GAIN);
 
 			// Min-Max Scaling
-			std::vector<float> inputs_ch0_scaled = Preprocessing::minMaxScale(inputs_ch0_mv, MIN_VALUE, MAX_VALUE);
-			std::vector<float> inputs_ch1_scaled = Preprocessing::minMaxScale(inputs_ch1_mv, MIN_VALUE, MAX_VALUE);
+			std::vector<float> inputs_ch0_scaled = Preprocessing::zScoreNormalization(inputs_ch0_mv); //MIN_VALUE, MAX_VALUE);
+			std::vector<float> inputs_ch1_scaled = Preprocessing::zScoreNormalization(inputs_ch1_mv);//, MIN_VALUE, MAX_VALUE);
 
 			// Execute Model with received inputs
 			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_scaled);
