@@ -11,7 +11,7 @@ std::vector<float> Preprocessing::minMaxScale(std::vector<float> inputs, float m
     return inputs;
 }
 
-std::vector<float> Preprocessing::zScoreNormalization(std::vector<float> inputs) {
+std::vector<float> Preprocessing::zScoreNormalization(std::vector<float> inputs, int factor) {
         if (inputs.empty()) return {}; // Handle empty input case
 
         // Compute mean
@@ -32,7 +32,7 @@ std::vector<float> Preprocessing::zScoreNormalization(std::vector<float> inputs)
         std::vector<float> normalized;
         normalized.reserve(inputs.size());
         for (float val : inputs) {
-            normalized.push_back((val - mean) / stddev);
+            normalized.push_back(factor*((val - mean) / stddev));
         }
 
         return normalized;
