@@ -142,12 +142,12 @@ int main()
 				inputs_ch0_mv,
 				online_min_max_ch0.getMinValue(),
 				online_min_max_ch0.getMaxValue(),
-				1000);
+				1000.0);
 			std::vector<float> inputs_ch1_normalized = Preprocessing::minMaxNormalization(
 				inputs_ch1_mv,
 				online_min_max_ch1.getMinValue(),
 				online_min_max_ch1.getMaxValue(),
-				1000);
+				1000.0);
 
 			// Execute Model with received inputs
 			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_normalized);
