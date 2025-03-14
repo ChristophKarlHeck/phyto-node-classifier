@@ -25,7 +25,7 @@
  * which are included in the bare metal build are also orchestrated by the
  * CMakeLists file. For example use see examples/arm/run.sh
  */
-#include "cnn_z_score_correct/model_pte.h"
+#include "60_min_max/model_pte.h"
 #include "model_executor/ModelExecutor.h"
 
 using namespace exec_aten;

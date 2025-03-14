@@ -147,8 +147,8 @@ class Conv1DModel(pl.LightningModule):
 
         flattened_size = self._compute_flattened_size(input_channels, output_channels, kernel_size)
 
-        self.linear = nn.Linear(flattened_size, 64, bias=False) # fully connected layer
-        self.output = nn.Linear(64, 2, bias=False)
+        self.linear = nn.Linear(flattened_size, 48, bias=False) # fully connected layer
+        self.output = nn.Linear(48, 2, bias=False)
         self.loss_fn = nn.CrossEntropyLoss()
         self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=2)
         self.f1_score = torchmetrics.F1Score(task="multiclass", num_classes=2)
@@ -266,7 +266,7 @@ val_loader = DataLoader(val_dataset, batch_size=8, num_workers=7)
 test_loader = DataLoader(test_dataset, batch_size=8, num_workers=7)
 
 # Train the Model
-model = Conv1DModel(input_channels=1, output_channels=8, kernel_size=5, lr=0.0005497262484146898)
+model = Conv1DModel(input_channels=1, output_channels=32, kernel_size=5, lr=0.0007503666240513933)
 
 # Define checkpoint callback
 checkpoint_callback = ModelCheckpoint(
@@ -275,7 +275,7 @@ checkpoint_callback = ModelCheckpoint(
     save_top_k=1,        # Save only the best model
     filename="best_model-{epoch:02d}-{val_loss:.4f}"
 )
-trainer = pl.Trainer(max_epochs=500, callbacks=[checkpoint_callback], enable_progress_bar=True)
+trainer = pl.Trainer(max_epochs=100, callbacks=[checkpoint_callback], enable_progress_bar=True)
 trainer.fit(model, train_loader, val_loader)
 
 #Retrieve best model path and score
@@ -288,9 +288,9 @@ print(f"Best Model Score (val_loss): {best_model_score}")
 model = Conv1DModel.load_from_checkpoint(
     best_model_path,
     input_channels=1,
-    output_channels=8,
+    output_channels=32,
     kernel_size=5,
-    lr=0.0005497262484146898)
+    lr=0.0007503666240513933)
 
 trainer.test(model, test_loader)
 
