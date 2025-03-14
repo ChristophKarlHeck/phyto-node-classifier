@@ -1,17 +1,24 @@
-#include "preprocessing/Scaling.h"
+#include "preprocessing/Normalization.h"
 #include <cmath>
 #include <numeric> 
 
-std::vector<float> Preprocessing::minMaxScale(std::vector<float> inputs, float minValue, float maxValue) {
+std::vector<float> Preprocessing::minMaxNormalization(std::vector<float> inputs, float minValue, float maxValue, float factor) {
     if (inputs.empty()) return {}; // Handle empty input case
 
+    // Avoid division by zero if minValue equals maxValue.
+    if (maxValue == minValue) {
+        // Depending on your use case, you could return a vector of zeros
+        // or simply return the original inputs.
+        return std::vector<float>(inputs.size(), 0.0f);
+    }
+
     for (auto& value : inputs) {
-        value = (value - minValue) / (maxValue - minValue);
+        value = ((value - minValue) / (maxValue - minValue)) * factor;
     }
     return inputs;
 }
 
-std::vector<float> Preprocessing::zScoreNormalization(std::vector<float> inputs, int factor) {
+std::vector<float> Preprocessing::zScoreNormalization(std::vector<float> inputs, float factor) {
         if (inputs.empty()) return {}; // Handle empty input case
 
         // Compute mean

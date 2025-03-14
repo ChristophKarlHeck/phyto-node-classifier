@@ -20,7 +20,8 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "interfaces/SendingQueue.h"
 #include "model_executor/ModelExecutor.h"
 #include "serial_mail_sender/SerialMailSender.h"
-#include "preprocessing/Scaling.h"
+#include "preprocessing/Normalization.h"
+#include "preprocessing/OnlineMinMax.h"
 
 // Utility Headers
 #include "utils/Conversion.h"
@@ -97,6 +98,10 @@ int main()
 	// Start sending Thread
 	sending_data_thread.start(callback(send_output_to_data_sink));
 
+	// Online Min Max
+	OnlineMinMax online_min_max_ch0(600); // 600 = 1h since 100 values each 10 min
+	OnlineMinMax online_min_max_ch1(600); // 600 = 1h since 100 values each 10 min
+
     while (true) {
 
 		// Instantiate and initialize the model executor
@@ -128,13 +133,25 @@ int main()
 			std::vector<float> inputs_ch0_mv = get_analog_inputs(inputs_as_bytes_ch0, DATABITS, VREF, GAIN);
 			std::vector<float> inputs_ch1_mv = get_analog_inputs(inputs_as_bytes_ch1, DATABITS, VREF, GAIN);
 
+			// Online Min Max Sliding Window
+			online_min_max_ch0.update(inputs_ch0_mv);
+			online_min_max_ch1.update(inputs_ch1_mv);
+
 			// Min-Max Scaling
-			std::vector<float> inputs_ch0_scaled = Preprocessing::zScoreNormalization(inputs_ch0_mv, 1000); //MIN_VALUE, MAX_VALUE);
-			std::vector<float> inputs_ch1_scaled = Preprocessing::zScoreNormalization(inputs_ch1_mv, 1000);//, MIN_VALUE, MAX_VALUE);
+			std::vector<float> inputs_ch0_normalized = Preprocessing::minMaxNormalization(
+				inputs_ch0_mv,
+				online_min_max_ch0.getMinValue(),
+				online_min_max_ch0.getMaxValue(),
+				1000);
+			std::vector<float> inputs_ch1_normalized = Preprocessing::minMaxNormalization(
+				inputs_ch1_mv,
+				online_min_max_ch1.getMinValue(),
+				online_min_max_ch1.getMaxValue(),
+				1000);
 
 			// Execute Model with received inputs
-			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_scaled);
-			std::vector<float> results_ch1 = executor.run_model(inputs_ch1_scaled);
+			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_normalized);
+			std::vector<float> results_ch1 = executor.run_model(inputs_ch1_normalized);
 
 			while (!sending_queue.mail_box.empty()) {
                 // Wait until sending queue is empty
