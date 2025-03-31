@@ -74,22 +74,28 @@ void print_heap_stats() {
 
 int main()
 {	
+	printf("hi");
 	std::vector<float> test_input_vector = {
-		0.3148, -0.2392,  1.9567,  0.9869,  0.0050,  1.2305,  1.1584,
-		-0.3791, -0.4159,  0.6352,  0.5685,  1.0393,  1.5020, -0.1033,
-		0.8617, -1.5182, -1.1849, -1.7219,  1.7003, -0.0118,  0.0657,
-		-0.5634, -0.0981, -0.4158,  0.3380,  1.0453,  0.9805, -1.2600,
-		-1.3031, -1.1824,  0.3772,  0.1872,  0.3362, -0.0430,  0.1310,
-		0.4116, -0.5709,  0.2433,  1.6742,  0.5843, -0.9308, -0.5684,
-		-0.5613, -1.6491,  0.4206, -0.9054,  0.7312, -1.5096, -0.3996,
-		-0.8861, -0.9108, -0.3805, -0.6605, -0.5171, -1.0995, -0.3569,
-		1.5997, -2.5390, -2.4954, -0.7654,  1.4457,  1.2585,  0.1363,
-		-0.1437, -0.0370,  0.6101, -1.1453,  1.4333, -1.2200,  0.9154,
-		0.6001,  0.4928,  1.5454,  0.0624, -0.7268,  0.6277,  0.8344,
-		-0.1834, -0.2857, -0.9900, -0.8002,  0.2790,  1.1976, -0.6656,
-		-1.5403, -0.5115,  0.0698, -1.4269,  0.2222,  0.3240,  0.6256,
-		1.6387, -1.6100,  0.1028,  0.1044, -0.4829, -0.2006, -2.0888,
-		-0.4376,  1.2862
+		906.1954, 995.5962, 950.4269, 815.3856, 815.6190,
+		905.4908, 725.5136, 770.2163, 681.5200, 860.7928,
+		815.1478, 905.4908, 860.0837, 770.4496, 905.4908,
+		861.4973, 771.1541, 770.9208, 681.9911, 681.0488,
+		771.6253, 816.0901, 771.1541, 726.6893, 771.3920,
+		771.3920, 637.0552, 53.5965, -440.6903, -845.1141,
+		-799.7069, -934.5149, -755.2421, -844.8762, -844.8762,
+		-1069.3182, -1068.8472, -1024.1489, -799.9403, -710.5395,
+		-82.3826, 366.9727, 591.1769, 680.8155, 725.2803,
+		725.9848, 725.7515, 636.1129, 681.7534, 770.9208,
+		816.0901, 680.8155, 725.9848, 636.8174, 859.3792,
+		816.0901, 816.0901, 726.6893, 770.9208, 726.9272,
+		680.5777, 725.9848, 726.4560, 680.8155, 770.9208,
+		726.6893, 680.5777, 725.7515, 726.6893, 366.7348,
+		-81.9159, -350.3516, -260.7130, -440.6903, -619.4919,
+		-665.3702, -620.2008, -665.3702, -440.6903, -126.3808,
+		-260.9509, -126.6141, 6.7803, 277.8052, 97.5946,
+		-36.5088, -709.3638, -1337.2874, -1966.3821, -2056.4873,
+		-2101.1899, -2010.8468, -2190.3530, -2191.0620, -2145.8882,
+		-2146.3591, -2191.0620, -2190.3530, -2190.3530, -2100.4854
 	};
 
 	// Start reading data from ADC Thread
@@ -99,8 +105,8 @@ int main()
 	sending_data_thread.start(callback(send_output_to_data_sink));
 
 	// Online Min Max
-	OnlineMinMax online_min_max_ch0(600); // 600 = 1h since 100 values each 10 min
-	OnlineMinMax online_min_max_ch1(600); // 600 = 1h since 100 values each 10 min
+	// OnlineMinMax online_min_max_ch0(600); // 600 = 1h since 100 values each 10 min
+	// OnlineMinMax online_min_max_ch1(600); // 600 = 1h since 100 values each 10 min
 
     while (true) {
 
@@ -134,19 +140,15 @@ int main()
 			std::vector<float> inputs_ch1_mv = get_analog_inputs(inputs_as_bytes_ch1, DATABITS, VREF, GAIN);
 
 			// Online Min Max Sliding Window
-			online_min_max_ch0.update(inputs_ch0_mv);
-			online_min_max_ch1.update(inputs_ch1_mv);
+			// online_min_max_ch0.update(inputs_ch0_mv);
+			// online_min_max_ch1.update(inputs_ch1_mv);
 
 			// Min-Max Scaling
-			std::vector<float> inputs_ch0_normalized = Preprocessing::minMaxNormalization(
+			std::vector<float> inputs_ch0_normalized = Preprocessing::zScoreNormalization(
 				inputs_ch0_mv,
-				online_min_max_ch0.getMinValue(),
-				online_min_max_ch0.getMaxValue(),
 				1000.0);
-			std::vector<float> inputs_ch1_normalized = Preprocessing::minMaxNormalization(
+			std::vector<float> inputs_ch1_normalized = Preprocessing::zScoreNormalization(
 				inputs_ch1_mv,
-				online_min_max_ch1.getMinValue(),
-				online_min_max_ch1.getMaxValue(),
 				1000.0);
 
 			// Execute Model with received inputs

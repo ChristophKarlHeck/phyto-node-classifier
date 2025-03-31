@@ -204,18 +204,18 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 			Tensor t = outputs[i].toTensor();
 			for (int j = 0; j < outputs[i].toTensor().numel(); ++j) {
 			if (t.scalar_type() == ScalarType::Int) {
-				// printf(
-				// 	"Output[%d][%d]: %d\n",
-				// 	i,
-				// 	j,
-				// 	outputs[i].toTensor().const_data_ptr<int>()[j]);
+				printf(
+					"Output[%d][%d]: %d\n",
+					i,
+					j,
+					outputs[i].toTensor().const_data_ptr<int>()[j]);
 				results.push_back(outputs[i].toTensor().const_data_ptr<int>()[j]);
 			} else {
-				// printf(
-				// 	"Output[%d][%d]: %f\n",
-				// 	i,
-				// 	j,
-				// 	outputs[i].toTensor().const_data_ptr<float>()[j]);
+				printf(
+					"Output[%d][%d]: %f\n",
+					i,
+					j,
+					outputs[i].toTensor().const_data_ptr<float>()[j]);
 				results.push_back(outputs[i].toTensor().const_data_ptr<float>()[j]);
 			}
 			}
