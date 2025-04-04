@@ -37,8 +37,8 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #define GAIN 4.0
 
 // MIN-MAX-SCALING
-#define MAX_VALUE 0.2
-#define MIN_VALUE -0.2
+#define MAX_VALUE 200
+#define MIN_VALUE -200
 
 // ADC
 #define SPI_FREQUENCY 10000000 // 1MHz
@@ -144,11 +144,15 @@ int main()
 			// online_min_max_ch1.update(inputs_ch1_mv);
 
 			// Min-Max Scaling
-			std::vector<float> inputs_ch0_normalized = Preprocessing::zScoreNormalization(
+			std::vector<float> inputs_ch0_normalized = Preprocessing::minMaxNormalization(
 				inputs_ch0_mv,
+				MIN_VALUE,
+				MAX_VALUE,
 				1000.0);
-			std::vector<float> inputs_ch1_normalized = Preprocessing::zScoreNormalization(
+			std::vector<float> inputs_ch1_normalized = Preprocessing::minMaxNormalization(
 				inputs_ch1_mv,
+				MIN_VALUE,
+				MAX_VALUE,
 				1000.0);
 
 			// Execute Model with received inputs
