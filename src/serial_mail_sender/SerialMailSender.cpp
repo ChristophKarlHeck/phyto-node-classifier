@@ -5,7 +5,7 @@
 // Initialize the static BufferedSerial instance (PC_1 = TX, PC_0 = RX)
 // Raspberry Pi: (GPIO 14 = TX, GPIO 15 = RX)
 // Connection TX-RX, RX-TX, GND-GND
-BufferedSerial SerialMailSender::m_serial_port(/*PC_1*/USBTX,/*PC_0*/USBRX, BAUDRATE);
+BufferedSerial SerialMailSender::m_serial_port(PC_1/*USBTX*/,PC_0/*USBRX*/, BAUDRATE);
 
 // Get the single instance of SerialMailSender
 SerialMailSender& SerialMailSender::getInstance(void) {
