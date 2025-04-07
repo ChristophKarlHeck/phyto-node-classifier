@@ -84,7 +84,7 @@ int main()
 
 		if (mail) {
 
-			//mbed_lib::print_memory_info("1");
+			mbed_lib::print_memory_info("1");
 
 		    // Retrieve the message from the mail box
 		    ReadingQueue::mail_t* reading_mail = mail;
@@ -114,15 +114,15 @@ int main()
 			    0.2,
 				1000.0);
 			
-			// mbed_lib::print_memory_info("1");
+			mbed_lib::print_memory_info("1");
 
 			// Execute Model with received inputs
 			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_normalized);
 
-			// mbed_lib::print_memory_info("2");
+			mbed_lib::print_memory_info("2");
 			std::vector<float> results_ch1 = executor.run_model(inputs_ch1_normalized);
 
-			// mbed_lib::print_memory_info("3");
+			mbed_lib::print_memory_info("3");
 
 			while (!sending_queue.mail_box.empty()) {
                 // Wait until sending queue is empty
@@ -130,7 +130,7 @@ int main()
 				//printf("Wait for the sending queue to become empty.\n");
             }
 		    
-			// mbed_lib::print_memory_info("4");
+			mbed_lib::print_memory_info("4");
 
 			if (sending_queue.mail_box.empty()) {
 				SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
@@ -141,7 +141,7 @@ int main()
 				sending_queue.mail_box.put(sending_mail); 
 			}
 
-			// mbed_lib::print_memory_info("5");
+			mbed_lib::print_memory_info("5");
 		}
 	}
 

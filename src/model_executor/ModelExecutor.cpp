@@ -27,7 +27,7 @@
  */
 #include "fcn_temp/amm/model_pte.h"
 #include "model_executor/ModelExecutor.h"
-//#include "utils/mbed_stats_wrapper.h"
+#include "utils/mbed_stats_wrapper.h"
 
 using namespace exec_aten;
 using namespace std;
@@ -82,13 +82,13 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 
 		torch::executor::runtime_init();
 
-		// mbed_lib::print_memory_info("10");
+		mbed_lib::print_memory_info("10");
 
 		ET_LOG(Info, "Model in %p %c", model_pte, model_pte[0]);
 
 		m_method_allocator_pool = (uint8_t*)malloc(m_allocator_pool_size);
 
-		// mbed_lib::print_memory_info("11");
+		mbed_lib::print_memory_info("11");
 
 		auto loader =
 			torch::executor::util::BufferDataLoader(model_pte, sizeof(model_pte));
@@ -105,7 +105,7 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 
 		ET_LOG(Info, "Model buffer loaded, has %lu methods", program->num_methods());
 
-		// mbed_lib::print_memory_info("12");
+		mbed_lib::print_memory_info("12");
 
 		const char* method_name = nullptr;
 		{
@@ -125,7 +125,7 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 				(unsigned int)method_meta.error());
 		}
 
-		// mbed_lib::print_memory_info("13");
+		mbed_lib::print_memory_info("13");
 
 		torch::executor::MemoryAllocator method_allocator{
 			torch::executor::MemoryAllocator(
@@ -136,7 +136,7 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 			planned_spans; // Passed to the allocator
 		size_t num_memory_planned_buffers = method_meta->num_memory_planned_buffers();
 
-		// mbed_lib::print_memory_info("14");
+		mbed_lib::print_memory_info("14");
 
 		for (size_t id = 0; id < num_memory_planned_buffers; ++id) {
 			size_t buffer_size =
@@ -147,7 +147,7 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 			planned_spans.push_back({planned_buffers.back().get(), buffer_size});
 		}
 
-		// mbed_lib::print_memory_info("15");
+		mbed_lib::print_memory_info("15");
 
 		torch::executor::HierarchicalAllocator planned_memory(
 			{planned_spans.data(), planned_spans.size()});
@@ -166,7 +166,7 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 		}
 		ET_LOG(Info, "Method loaded.");
 
-		// mbed_lib::print_memory_info("16");
+		mbed_lib::print_memory_info("16");
 
 		ET_LOG(Info, "Preparing inputs...");
 		auto inputs = torch::executor::util::prepare_input_tensors(*method);
@@ -197,7 +197,7 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 
 		/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-		// mbed_lib::print_memory_info("17");
+		mbed_lib::print_memory_info("17");
 
 		ET_LOG(Info, "Starting the model execution...");
 		//delay_ms(100);
@@ -212,7 +212,7 @@ std::vector<float> ModelExecutor::run_model(std::vector<float> feature_vector){
 			ET_LOG(Info, "Model executed successfully.");
 		}
 
-		// mbed_lib::print_memory_info("18");
+		mbed_lib::print_memory_info("18");
 
 		std::vector<torch::executor::EValue> outputs(method->outputs_size());
 		ET_LOG(Info, "%zu outputs: ", outputs.size());
