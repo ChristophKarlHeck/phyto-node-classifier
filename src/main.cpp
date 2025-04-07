@@ -114,15 +114,15 @@ int main()
 			    0.2,
 				1000.0);
 			
-			mbed_lib::print_memory_info("1");
+			mbed_lib::print_memory_info("2");
 
 			// Execute Model with received inputs
 			std::vector<float> results_ch0 = executor.run_model(inputs_ch0_normalized);
 
-			mbed_lib::print_memory_info("2");
+			mbed_lib::print_memory_info("3");
 			std::vector<float> results_ch1 = executor.run_model(inputs_ch1_normalized);
 
-			mbed_lib::print_memory_info("3");
+			// mbed_lib::print_memory_info("3");
 
 			while (!sending_queue.mail_box.empty()) {
                 // Wait until sending queue is empty

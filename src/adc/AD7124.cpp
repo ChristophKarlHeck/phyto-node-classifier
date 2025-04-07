@@ -243,8 +243,6 @@ void AD7124::read_voltage_from_both_channels(unsigned int downsampling_rate, uns
     const float collection_interval = static_cast<float>(downsampling_rate) / vector_size;
     const uint32_t collection_interval_ms = static_cast<uint32_t>(collection_interval * 1000);
 
-    unsigned int internal_circular_buffer_size = 100;
-
     std::vector<std::array<uint8_t,3>> byte_inputs_channel_0;
     std::vector<std::array<uint8_t,3>> byte_inputs_channel_1;
 
