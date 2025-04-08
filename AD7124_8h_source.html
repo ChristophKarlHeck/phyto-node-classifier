@@ -134,12 +134,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            std::vector&lt;std::array&lt;uint8_t, 3&gt;&gt; byte_inputs_channel_0,</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            std::vector&lt;std::array&lt;uint8_t, 3&gt;&gt; byte_inputs_channel_1</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        );</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>};</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>};</div>
 </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassAD7124_html"><div class="ttname"><a href="classAD7124.html">AD7124</a></div><div class="ttdoc">Singleton class for interfacing with the AD7124 using SPI.</div><div class="ttdef"><b>Definition</b> AD7124.h:18</div></div>
 <div class="ttc" id="aclassAD7124_html_a02acf146ca56efdee458971bf56c9ff3"><div class="ttname"><a href="classAD7124.html#a02acf146ca56efdee458971bf56c9ff3">AD7124::getInstance</a></div><div class="ttdeci">static AD7124 &amp; getInstance(int spi_frequency)</div><div class="ttdoc">Gets the singleton instance of the AD7124 class.</div><div class="ttdef"><b>Definition</b> AD7124.cpp:202</div></div>
-<div class="ttc" id="aclassAD7124_html_aba9604141394112cd788eaca70787026"><div class="ttname"><a href="classAD7124.html#aba9604141394112cd788eaca70787026">AD7124::read_voltage_from_both_channels</a></div><div class="ttdeci">void read_voltage_from_both_channels(unsigned int downsampling_rate, unsigned int vector_size)</div><div class="ttdoc">Reads voltage data from both ADC channels.</div><div class="ttdef"><b>Definition</b> AD7124.cpp:241</div></div>
+<div class="ttc" id="aclassAD7124_html_aba9604141394112cd788eaca70787026"><div class="ttname"><a href="classAD7124.html#aba9604141394112cd788eaca70787026">AD7124::read_voltage_from_both_channels</a></div><div class="ttdeci">void read_voltage_from_both_channels(unsigned int downsampling_rate, unsigned int vector_size)</div><div class="ttdoc">Reads voltage data from both ADC channels.</div><div class="ttdef"><b>Definition</b> AD7124.cpp:253</div></div>
 <div class="ttc" id="aclassAD7124_html_adcbec0d07d19a5a49f03918ea1c41090"><div class="ttname"><a href="classAD7124.html#adcbec0d07d19a5a49f03918ea1c41090">AD7124::operator=</a></div><div class="ttdeci">AD7124 &amp; operator=(const AD7124 &amp;)=delete</div><div class="ttdoc">Deleted copy assignment operator to prevent copying of the singleton instance.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
