@@ -5,8 +5,8 @@
 #include "utils/utils.h"
 #include "utils/logger.h"
 #include "interfaces/ReadingQueue.h"
+#include "utils/reading_mutex.h"
 #include <chrono>
-
 
 void AD7124::ctrl_reg(char RW){
     /* read/write the control register */
@@ -211,27 +211,39 @@ AD7124& AD7124::getInstance(int spi_frequency) {
  * @param byte_inputs_channel_1 Data from channel 1.
  */
 void AD7124::send_data_to_main_thread(
-    std::vector<std::array<uint8_t,3>> byte_inputs_channel_0,
-    std::vector<std::array<uint8_t,3>> byte_inputs_channel_1)
-{
-    // Access the shared queue
+    std::vector<std::array<uint8_t, 3>> byte_inputs_channel_0,
+    std::vector<std::array<uint8_t, 3>> byte_inputs_channel_1)
+{   
+    // Acquire the mutex before accessing the shared mailbox.
+    reading_mutex.lock();
+
     ReadingQueue& reading_queue = ReadingQueue::getInstance();
 
+    // Check and wait until the mailbox is empty before putting new mail.
     while (!reading_queue.mail_box.empty()) {
-        // Wait until mail box is empty
-        thread_sleep_for(1);
-        //INFO("Wait for the reading queue to become empty.\n");
+        reading_mutex.unlock();
+        rtos::ThisThread::sleep_for(1);  // Allow the consumer to catch up.
+        //printf("Waiting for the reading queue to be empty.\n");
+        reading_mutex.lock();
     }
 
-    // Now that we have data in the channels, let's handle mailing
-    if (reading_queue.mail_box.empty()) {
-        ReadingQueue::mail_t* mail = reading_queue.mail_box.try_alloc();
-        mail->inputs_ch0 = byte_inputs_channel_0;
-        mail->inputs_ch1 = byte_inputs_channel_1;
+    // Now, when the mailbox is empty, allocate a new mail slot.
+    ReadingQueue::mail_t* mail = reading_queue.mail_box.try_alloc_for(rtos::Kernel::Clock::duration_u32::max());
+    if (mail) {  // Check in case allocation fails.
+        // Here you are assigning to the mail contents.
+        // NOTE: Make sure that ReadingQueue::mail_t's members are properly initialized.
+        // For example, if mail_t contains std::vector objects, their constructors should have been called.
+        std::copy(byte_inputs_channel_0.begin(), byte_inputs_channel_0.end(), mail->inputs_ch0.begin());
+        std::copy(byte_inputs_channel_1.begin(), byte_inputs_channel_1.end(), mail->inputs_ch1.begin());
         reading_queue.mail_box.put(mail);
     }
+    else {
+        //printf("Failed to allocate mail.\n");
+    }
 
+    reading_mutex.unlock();
 }
+
 
 /**
  * @brief Reads voltage data from both ADC channels with downsampling.

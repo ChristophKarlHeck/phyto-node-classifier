@@ -1,6 +1,7 @@
 #include "interfaces/ReadingQueue.h"
 
 // Static method to access the single instance
+// In C++11 and later, the common “Meyers Singleton” implementation
 ReadingQueue& ReadingQueue::getInstance() {
     static ReadingQueue instance;  // Guaranteed to be destroyed, initialized on first use
     return instance;

@@ -41,7 +41,11 @@ void SerialMailSender::sendMail(void) {
 
         auto mail = sending_queue.mail_box.try_get_for(rtos::Kernel::Clock::duration_u32::max());
 
-		if (mail) {
+		if (mail != nullptr) {
+
+            // Retrieve the message from the mail box
+            SendingQueue::mail_t sending_mail = *mail;
+            sending_queue.mail_box.free(mail);
 
             // Prepare the FlatBufferBuilder
             // FlatBufferBuilder should ideally be re-initialized inside the while loop 
@@ -50,22 +54,19 @@ void SerialMailSender::sendMail(void) {
             // internal buffer, and reusing it without clearing can lead to undefined behavior or memory issues.
             flatbuffers::FlatBufferBuilder builder(1024);
 
-            // Retrieve the message from the mail box
-            SendingQueue::mail_t *sending_mail = mail;
-
             // Create Flatbuffers vector of bytes
-            std::vector<SerialMail::Value> raw_input_bytes_ch0 = convertToSerialMailValues(sending_mail->inputs_ch0);
+            std::vector<SerialMail::Value> raw_input_bytes_ch0 = convertToSerialMailValues(sending_mail.inputs_ch0);
             auto inputs_ch0 = builder.CreateVectorOfStructs(raw_input_bytes_ch0.data(), raw_input_bytes_ch0.size());
 
-            std::vector<SerialMail::Value> raw_input_bytes_ch1 = convertToSerialMailValues(sending_mail->inputs_ch1);
+            std::vector<SerialMail::Value> raw_input_bytes_ch1 = convertToSerialMailValues(sending_mail.inputs_ch1);
             auto inputs_ch1 = builder.CreateVectorOfStructs(raw_input_bytes_ch1.data(), raw_input_bytes_ch1.size());
 
             // Create Flatbuffers float array
-            std::vector<float> classification_values_ch0 = sending_mail->classification_ch0;
+            std::vector<float> classification_values_ch0 = sending_mail.classification_ch0;
             auto classification_ch0 = builder.CreateVector(classification_values_ch0.data(), classification_values_ch0.size());
 
             // Create Flatbuffers float array
-            std::vector<float> classification_values_ch1 = sending_mail->classification_ch1;
+            std::vector<float> classification_values_ch1 = sending_mail.classification_ch1;
             auto classification_ch1 = builder.CreateVector(classification_values_ch1.data(), classification_values_ch1.size());
 
             // Channel and Classification active
@@ -94,7 +95,7 @@ void SerialMailSender::sendMail(void) {
             //printf("sent\n");
             // Free the allocated mail to avoid memory leaks
 			// make mail box empty
-			sending_queue.mail_box.free(sending_mail); 
+			
 
         }
     }
