@@ -36,6 +36,14 @@ private:
     // Function to convert inputs to SerialMail::Value array
     std::vector<SerialMail::Value> convertToSerialMailValues(const std::vector<std::array<uint8_t, 3>>& inputs);
 
+    void convertMailToVectors(const SendingQueue::mail_t &sending_mail,
+        std::vector<std::array<uint8_t, 3>> &vec_ch0,
+        std::vector<std::array<uint8_t, 3>> &vec_ch1);
+
+    void convertMailToFloatVectors(const SendingQueue::mail_t &sending_mail,
+        std::vector<float> &vec_ch0,
+        std::vector<float> &vec_ch1);
+
 };
 
 #endif // SERIAL_MAIL_SENDER_H

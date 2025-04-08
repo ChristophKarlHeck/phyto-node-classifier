@@ -217,13 +217,13 @@ void AD7124::send_data_to_main_thread(
     // Acquire the mutex before accessing the shared mailbox.
     reading_mutex.lock();
 
+    // Access the shared queue
     ReadingQueue& reading_queue = ReadingQueue::getInstance();
 
     // Check and wait until the mailbox is empty before putting new mail.
     while (!reading_queue.mail_box.empty()) {
         reading_mutex.unlock();
-        rtos::ThisThread::sleep_for(1);  // Allow the consumer to catch up.
-        //printf("Waiting for the reading queue to be empty.\n");
+        thread_sleep_for(1);// Allow the consumer to catch up.
         reading_mutex.lock();
     }
 
@@ -236,9 +236,6 @@ void AD7124::send_data_to_main_thread(
         std::copy(byte_inputs_channel_0.begin(), byte_inputs_channel_0.end(), mail->inputs_ch0.begin());
         std::copy(byte_inputs_channel_1.begin(), byte_inputs_channel_1.end(), mail->inputs_ch1.begin());
         reading_queue.mail_box.put(mail);
-    }
-    else {
-        //printf("Failed to allocate mail.\n");
     }
 
     reading_mutex.unlock();

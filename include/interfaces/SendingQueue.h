@@ -5,6 +5,8 @@
 #include <vector>
 #include <array>
 
+#include "utils/constants.h"
+
 class SendingQueue {
 public:
 
@@ -13,14 +15,14 @@ public:
 
     // The structure used for inter-thread communication
     typedef struct {
-        std::vector<std::array<uint8_t, 3>> inputs_ch0;  // Vector of downsampled analog values
-        std::vector<std::array<uint8_t, 3>> inputs_ch1;  
-        std::vector<float> classification_ch0;
-        std::vector<float> classification_ch1;                              
+        std::array<std::array<uint8_t, 3>, VECTOR_SIZE> inputs_ch0;
+        std::array<std::array<uint8_t, 3>, VECTOR_SIZE> inputs_ch1;
+        std::array<float, CLASSES> classification_ch0;
+        std::array<float, CLASSES> classification_ch1;                              
     } mail_t;
 
     // Mail object for inter-thread communication
-    Mail<mail_t, 20> mail_box;  // Queue with size 4, can be adjusted as necessary
+    Mail<mail_t, 1> mail_box;  
 
 private:
     // Private constructor to prevent direct instantiation

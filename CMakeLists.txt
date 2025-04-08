@@ -33,6 +33,7 @@ set(SOURCES
      ${CMAKE_CURRENT_SOURCE_DIR}/src/preprocessing/OnlineMean.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/mbed_stats_wrapper.cpp
      ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/reading_mutex.cpp
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/sending_mutex.cpp
 )
 
 add_executable(PhytoClassifier ${SOURCES})

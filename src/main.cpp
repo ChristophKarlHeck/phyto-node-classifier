@@ -22,6 +22,7 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "preprocessing/Normalization.h"
 #include "utils/mbed_stats_wrapper.h"
 #include "utils/reading_mutex.h"
+#include "utils/sending_mutex.h"
 #include "utils/constants.h"
 
 // Utility Headers
@@ -83,12 +84,12 @@ int main()
 		// Access the shared ReadingQueue instance
 		reading_mutex.lock();
 		ReadingQueue& reading_queue = ReadingQueue::getInstance();
-		ReadingQueue::mail_t *mail = reading_queue.mail_box.try_get();
+		ReadingQueue::mail_t *reading_mail = reading_queue.mail_box.try_get();
 		std::vector<std::array<uint8_t, 3>> inputs_as_bytes_ch0; 
 		std::vector<std::array<uint8_t, 3>> inputs_as_bytes_ch1;
-		if (mail != nullptr) {
-			convertMailToVectors(*mail, inputs_as_bytes_ch0, inputs_as_bytes_ch1);
-			reading_queue.mail_box.free(mail);
+		if (reading_mail != nullptr) {
+			convertMailToVectors(*reading_mail, inputs_as_bytes_ch0, inputs_as_bytes_ch1);
+			reading_queue.mail_box.free(reading_mail);
 		}
 		else{
 			reading_mutex.unlock();
@@ -99,13 +100,11 @@ int main()
 		// Instantiate and initialize the model executor
 		ModelExecutor& executor = ModelExecutor::getInstance(16384); // Pass the desired pool size
 
-		// Access the shared queue
-		SendingQueue& sending_queue = SendingQueue::getInstance();
 			
 		std::vector<float> inputs_ch0_mv = get_analog_inputs(inputs_as_bytes_ch0, DATABITS, VREF, GAIN);
 		std::vector<float> inputs_ch1_mv = get_analog_inputs(inputs_as_bytes_ch1, DATABITS, VREF, GAIN);
 
-		// Min-Max Scaling
+		// NORMALIZATION
 		std::vector<float> inputs_ch0_normalized = Preprocessing::minMaxNormalization(
 			inputs_ch0_mv,
 			-0.2,
@@ -122,23 +121,26 @@ int main()
 		std::vector<float> results_ch0 = executor.run_model(inputs_ch0_normalized);
 		std::vector<float> results_ch1 = executor.run_model(inputs_ch1_normalized);
 
+		sending_mutex.lock();
+		// Access the shared queue
+		SendingQueue& sending_queue = SendingQueue::getInstance();
 
 		while (!sending_queue.mail_box.empty()) {
-			// Wait until sending queue is empty
-			thread_sleep_for(1);
-			//printf("Wait for the sending queue to become empty.\n");
+			sending_mutex.unlock();
+			thread_sleep_for(1); // Allow the consumer to catch up.
+			sending_mutex.lock();
 		}
-		
-		// mbed_lib::print_memory_info("4");
 
-		if (sending_queue.mail_box.empty()) {
-			SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc();
-			sending_mail->inputs_ch0 = inputs_as_bytes_ch0;
-			sending_mail->inputs_ch1 = inputs_as_bytes_ch1;
-			sending_mail->classification_ch0 = results_ch0;
-			sending_mail->classification_ch1 = results_ch1;
+		// Now, when the mailbox is empty, allocate a new mail slot.
+    	SendingQueue::mail_t* sending_mail = sending_queue.mail_box.try_alloc_for(rtos::Kernel::Clock::duration_u32::max());
+		if (sending_mail) {
+			std::copy(inputs_as_bytes_ch0.begin(), inputs_as_bytes_ch0.end(), sending_mail->inputs_ch0.begin());
+        	std::copy(inputs_as_bytes_ch1.begin(), inputs_as_bytes_ch1.end(), sending_mail->inputs_ch1.begin());
+			std::copy(results_ch0.begin(), results_ch0.end(), sending_mail->classification_ch0.begin());
+        	std::copy(results_ch1.begin(), results_ch1.end(), sending_mail->classification_ch1.begin());
 			sending_queue.mail_box.put(sending_mail); 
 		}
+		sending_mutex.unlock();
 
 	
 	}
