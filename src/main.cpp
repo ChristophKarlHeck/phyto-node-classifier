@@ -30,7 +30,7 @@ Change the values of the following variables in the file: mbed-os/connectivity/F
 #include "utils/logger.h"
 
 // *** DEFINE GLOBAL CONSTANTS ***
-#define DOWNSAMPLING_RATE 60 // seconds 
+#define DOWNSAMPLING_RATE 600 // seconds 
 
 // CONVERSION
 #define DATABITS 8388608
