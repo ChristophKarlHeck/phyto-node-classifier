@@ -25,7 +25,7 @@
  * which are included in the bare metal build are also orchestrated by the
  * CMakeLists file. For example use see examples/arm/run.sh
  */
-#include "fcn_temp/amm/model_pte.h"
+#include "fcn_ozone/amm/model_pte.h"
 #include "model_executor/ModelExecutor.h"
 //#include "utils/mbed_stats_wrapper.h"
 
